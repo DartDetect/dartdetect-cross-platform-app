@@ -29,7 +29,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LoginPage">
+      <Stack.Navigator >
         {user ? (
           <Stack.Screen name="Dashboard" component={Dashboard} />
         ): 

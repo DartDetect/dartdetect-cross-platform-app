@@ -1,15 +1,16 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, Alert } from "react-native";
+import { View, Text, StyleSheet, Button, Alert, useWindowDimensions } from "react-native";
 import { signOut } from "firebase/auth";
 import { auth } from "../services/firebaseConfig";
 
 export default function Dashboard({ navigation }) {
+  
   // Function to handle user logout
   const handleLogout = async () => {
     try {
       await signOut(auth);
       Alert.alert("Logged Out", "You have been logged out.");
-      //navigation.replace("LoginPage"); // Redirect to LoginPage
+      //navigation.navigate("LoginPage"); // Redirect to LoginPage
     } catch (error) {
       Alert.alert("Error", error.message);
     }

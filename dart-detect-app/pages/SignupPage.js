@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, Button, useWindowDimensions, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput,Image, Button, useWindowDimensions, Alert } from "react-native";
 import { createUserWithEmailAndPassword } from "@firebase/auth";
 import { auth } from "../services/firebaseConfig";
 
@@ -24,13 +24,34 @@ export default function SignupPage({ navigation }) {
       Alert.alert("Error", error.message);
     }
   }
-
-  return ( // Main Container for page layout
+  return (
+     // Main Container for page layout
     <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
-      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-      <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
-      <Button title="Sign Up" onPress={handleSignup} />
+      <Image source={require("../assets/logo1.png")} style={styles.logo} />
+        <Text style={styles.title}>Sign Up</Text>
+        <Text style={styles.title}>Begin Your Training</Text>
+       
+        <TextInput 
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor={'gray'}
+          value={email} 
+          onChangeText={setEmail}
+          keyboardType="email-address" 
+          autoCapitalize="none" 
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Password" 
+          placeholderTextColor={'gray'}
+          value={password} 
+          onChangeText={setPassword} 
+          secureTextEntry 
+        />
+
+        <Button title="Sign Up" onPress={handleSignup} />
+
       <Text style={styles.link} onPress={() => navigation.navigate("LoginPage")}>
         Already have an account? Login Here
       </Text>
@@ -49,6 +70,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    marginBottom:20,
   },
 
   //  Styling for email and password input fields
@@ -66,7 +88,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
     textDecorationLine: "underline",
-  }
+  },
+  logo: {
+    width: 100, // Adjust width as needed
+    height: 100, // Adjust height as needed
+    marginBottom: 20,
+  },
 
 
 });
