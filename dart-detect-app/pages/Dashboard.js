@@ -22,13 +22,12 @@ export default function Dashboard({ navigation }) {
       <Text style={styles.welcome}>Welcome to Dart Detect Dashboard!</Text>
       <Text style={styles.userInfo}>
         You are logged in as: {auth.currentUser?.email}
-      </Text>
-
-      <Button title="Logout" onPress={handleLogout} />
+      </Text> 
 
       <View style={styles.placeholder}>
         <Text>Game stats and features coming soon!</Text>
       </View>
+        <Button title="Logout" onPress={handleLogout} />
     </View>
   );
 }
@@ -59,5 +58,6 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 5,
     backgroundColor: "#f9f9f9",
+    marginBottom: 100,
   },
 });
