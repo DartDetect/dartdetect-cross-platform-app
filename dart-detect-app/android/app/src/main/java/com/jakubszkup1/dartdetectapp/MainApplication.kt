@@ -1,4 +1,4 @@
-package com.dartdetectapp
+package com.jakubszkup1.dartdetectapp
 
 import android.app.Application
 import android.content.res.Configuration

@@ -1,4 +1,4 @@
-package com.dartdetectapp
+package com.jakubszkup1.dartdetectapp
 
 import android.os.Build
 import android.os.Bundle

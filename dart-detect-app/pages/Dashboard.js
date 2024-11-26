@@ -9,7 +9,7 @@ export default function Dashboard({ navigation }) {
     try {
       await signOut(auth);
       Alert.alert("Logged Out", "You have been logged out.");
-      navigation.replace("LoginPage"); // Redirect to LoginPage
+      //navigation.replace("LoginPage"); // Redirect to LoginPage
     } catch (error) {
       Alert.alert("Error", error.message);
     }
