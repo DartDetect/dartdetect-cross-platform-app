@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput,Image, Button, useWindowDimensions, Alert } from "react-native";
 import { createUserWithEmailAndPassword } from "@firebase/auth";
+
+
+
 import { auth } from "../services/firebaseConfig";
 
 export default function SignupPage({ navigation }) {

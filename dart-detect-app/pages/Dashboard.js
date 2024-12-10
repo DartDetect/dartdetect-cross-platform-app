@@ -2,6 +2,9 @@ import React from "react";
 import { View, Text, StyleSheet, Button, Alert, useWindowDimensions } from "react-native";
 import { signOut } from "firebase/auth";
 import { auth } from "../services/firebaseConfig";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+
 
 export default function Dashboard({ navigation }) {
   
@@ -58,6 +61,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 5,
     backgroundColor: "#f9f9f9",
-    marginBottom: 100,
+    marginBottom: 100
   },
+  
 });
