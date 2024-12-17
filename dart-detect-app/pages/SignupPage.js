@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useReducer, useState } from "react";
 import { View, Text, StyleSheet, TextInput,Image, Button, useWindowDimensions, Alert } from "react-native";
 import { createUserWithEmailAndPassword } from "@firebase/auth";
-
+import { createUserProfile,testFirestoreWrite } from "../services/firestoreDatabase";
 
 
 import { auth } from "../services/firebaseConfig";
@@ -11,6 +11,8 @@ export default function SignupPage({ navigation }) {
   // State Variables for email and password inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState(""); 
+  const [nationality, setNationality] = useState("");
 
   const { width } = useWindowDimensions(); // Get device width for responsive design
 
@@ -19,7 +21,12 @@ export default function SignupPage({ navigation }) {
     try {
      
       //Firebase method to create new user with email and password
-      await createUserWithEmailAndPassword(auth, email, password);
+     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+     const user = userCredential.user;
+     
+     await createUserProfile(user.uid, name, nationality)
+
+     await testFirestoreWrite();
 
       Alert.alert("Success, Account created succesfully!");
       navigation.navigate("LoginPage");
@@ -42,6 +49,22 @@ export default function SignupPage({ navigation }) {
           onChangeText={setEmail}
           keyboardType="email-address" 
           autoCapitalize="none" 
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          placeholderTextColor={"gray"}
+          value={name}
+          onChangeText={setName}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Nationality"
+          placeholderTextColor={"gray"}
+          value={nationality}
+          onChangeText={setNationality}
         />
 
         <TextInput
