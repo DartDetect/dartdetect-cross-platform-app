@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 
 import Slider from "@react-native-community/slider";
 import { InitialiseSession } from "../services/TrainingSessionMode";
+import { addRoundScore } from "../services/TrainingSessionMode"
 
 export default function TrainingPage() {
   const [image, setImage] = useState(null); // holds selected image URI
@@ -17,6 +18,17 @@ export default function TrainingPage() {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [totalRounds, setTotalRounds] = useState(1);
   const [session, setSession] = useState(InitialiseSession());
+
+  const startSession = () => {
+    setSessionStarted(true);
+    setSession(InitialiseSession());
+    setProcessedDarts([]);
+  };
+
+  // nextRound function
+  const nextRound = () => {
+  setSession((prevSession) => addRoundScore(prevSession, 0));
+  };
 
   // Function to request and verify permissions
   const requestPermissions = async () => {
@@ -155,15 +167,15 @@ export default function TrainingPage() {
         </View>
       )}
       
+      <View style={styles.sessionContainer}>
+      <Text style={styles.roundInfo}>Round: {session.currentRound} of {totalRounds}</Text>
       <Button title="Pick an Image📂" onPress={pickImage} />
       {uploading && <Text>Uploading...</Text>}
-      {image && (
-        <Image source={{ uri: image }} style={styles.image} />
-      )}
-
-      
-      
+      {image && (<Image source={{ uri: image }} style={styles.image} />)}     
       <Text style={styles.totalScore}>Total Score: {totalScore}</Text>
+      {session.currentRound < totalRounds && (<Button title="Next Round" onPress={nextRound} />
+)}
+      </View>
 
       <View style={styles.resultContainer}>
         <Text style={styles.resultTitle}>Processed Images:</Text>
