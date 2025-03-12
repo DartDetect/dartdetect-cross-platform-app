@@ -8,7 +8,7 @@ export const InitialiseSession = () => ({
 });
 
 // Add current round score and move to nect round
-export const AddRoundScore = (session, score) => {
+export const addRoundScore = (session, score) => {
     const newRoundScores = [...session.roundScores, score];
     return {
         ...session,
@@ -19,7 +19,7 @@ export const AddRoundScore = (session, score) => {
 };  
 
 // Calculate stats for round scores
-export const CalculateStats = (roundScores) => {
+export const calculateStats = (roundScores) => {
   const totalScore = roundScores.reduce((sum, score) => sum + score, 0);
   const averageScore = roundScores.length > 0 ? (totalScore / roundScores.length).toFixed(2) : 0;
   const highestScore = roundScores.length > 0 ? Math.max(...roundScores) : 0;
