@@ -7,7 +7,8 @@ export default function TrainingPage() {
   const [image, setImage] = useState(null); // holds selected image URI
   const [uploading, setUploading] = useState(false); // Tracks upload status
   const [totalScore, setTotalScore] = useState(0); // Holds cumulative score
-  const [processedImages, setProcessedImages] = useState([]); // Holds list of processed image details
+  const [processedDarts, setProcessedDarts] = useState([]); // Holds list of processed darts
+  //const [processedImages, setProcessedImages] = useState([]); // Holds list of processed image details
 
   // Function to request and verify permissions
   const requestPermissions = async () => {
@@ -105,11 +106,20 @@ export default function TrainingPage() {
 
       console.log("Processing Result:", result);
 
+      // Sum all dart scores detected
+      const newTotalScore = result.scores.reduce((sum, dart) => sum + dart.score, 0);
+
       // Update the total score and processed images list
-      setTotalScore((prevScore) => prevScore + result.score);
-      setProcessedImages((prevImages) => [
-        ...prevImages,
-        { filename: result.filename, score: result.score },
+      setTotalScore((prevScore) => prevScore + newTotalScore);
+
+      // Add processed darts to list
+      setProcessedDarts((prevDarts) => [
+        ...prevDarts,
+        ...result.scores.map((dart) => ({
+          filename: result.filename,
+          dart: dart.dart,
+          score: dart.score,
+        })),
       ]);
     } catch (error) {
       console.error("Processing Error:", error);
@@ -118,10 +128,10 @@ export default function TrainingPage() {
   };
 
   return (
-    <ScrollView contentContainerStylestyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Training Section</Text>
       
-      <Button title="Pick an Image" onPress={pickImage} />
+      <Button title="Pick an Image📂" onPress={pickImage} />
       {uploading && <Text>Uploading...</Text>}
       {image && (
         <Image source={{ uri: image }} style={styles.image} />
@@ -131,13 +141,12 @@ export default function TrainingPage() {
 
       <View style={styles.resultContainer}>
         <Text style={styles.resultTitle}>Processed Images:</Text>
-        {processedImages.map((img, index) => (
+        {processedDarts.map((dart, index) => (
           <Text key={index} style={styles.resultText}>
-            {img.filename} - Score: {img.score} 
+            🎯 Dart Score: {dart.score} (Image: {dart.filename})
           </Text>
         ))}
       </View>
-
     </ScrollView>
   );
 }
