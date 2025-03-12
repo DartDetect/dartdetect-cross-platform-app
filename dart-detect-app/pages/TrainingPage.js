@@ -3,12 +3,19 @@ import React ,{ useState }from "react";
 import { View, Text, StyleSheet,Button,Alert,Image,ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
+import { InitialiseSession } from "../services/TrainingSessionMode";
+
 export default function TrainingPage() {
   const [image, setImage] = useState(null); // holds selected image URI
   const [uploading, setUploading] = useState(false); // Tracks upload status
   const [totalScore, setTotalScore] = useState(0); // Holds cumulative score
   const [processedDarts, setProcessedDarts] = useState([]); // Holds list of processed darts
   //const [processedImages, setProcessedImages] = useState([]); // Holds list of processed image details
+
+  // Training session states
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [totalRounds, setTotalRounds] = useState(1);
+  const [session, setSession] = useState(InitialiseSession());
 
   // Function to request and verify permissions
   const requestPermissions = async () => {
@@ -130,12 +137,21 @@ export default function TrainingPage() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Training Section</Text>
+
+      {!sessionStarted && (
+        <View style={styles.sessionSetup}>
+        <Text>Select Number of Rounds: {totalRounds}</Text>
+        <Button title="Start Session" onPress={() => { setSessionStarted(true); setSession(InitialiseSession()); }} />
+        </View>
+      )}
       
       <Button title="Pick an Image📂" onPress={pickImage} />
       {uploading && <Text>Uploading...</Text>}
       {image && (
         <Image source={{ uri: image }} style={styles.image} />
       )}
+
+      
       
       <Text style={styles.totalScore}>Total Score: {totalScore}</Text>
 
