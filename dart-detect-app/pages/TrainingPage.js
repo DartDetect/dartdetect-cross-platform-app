@@ -3,6 +3,7 @@ import React ,{ useState }from "react";
 import { View, Text, StyleSheet,Button,Alert,Image,ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
+import Slider from "@react-native-community/slider";
 import { InitialiseSession } from "../services/TrainingSessionMode";
 
 export default function TrainingPage() {
@@ -141,7 +142,16 @@ export default function TrainingPage() {
       {!sessionStarted && (
         <View style={styles.sessionSetup}>
         <Text>Select Number of Rounds: {totalRounds}</Text>
-        <Button title="Start Session" onPress={() => { setSessionStarted(true); setSession(InitialiseSession()); }} />
+        
+        <Slider
+         style={{ width: 200, height: 40 }}
+         minimumValue={1}
+         maximumValue={30}
+         step={1}
+         value={totalRounds}
+         onValueChange={(value) => setTotalRounds(value)}
+         />
+         <Button title="Start Session" onPress={() => { setSessionStarted(true); setSession(InitialiseSession()); }} />
         </View>
       )}
       
