@@ -5,12 +5,14 @@ import * as ImagePicker from "expo-image-picker";
 
 import Slider from "@react-native-community/slider";
 import { InitialiseSession } from "../services/TrainingSessionMode";
-import { addRoundScore } from "../services/TrainingSessionMode"
+import { addRoundScore, calculateStats } from "../services/TrainingSessionMode"
+import { getAuth } from "firebase/auth";
+import { saveTrainingSession } from "../services/firestoreDatabase";
 
 export default function TrainingPage() {
   const [image, setImage] = useState(null); // holds selected image URI
   const [uploading, setUploading] = useState(false); // Tracks upload status
-  const [totalScore, setTotalScore] = useState(0); // Holds cumulative score
+  
   const [processedDarts, setProcessedDarts] = useState([]); // Holds list of processed darts
   //const [processedImages, setProcessedImages] = useState([]); // Holds list of processed image details
 
@@ -19,16 +21,28 @@ export default function TrainingPage() {
   const [totalRounds, setTotalRounds] = useState(1);
   const [session, setSession] = useState(InitialiseSession());
 
+  const stats = calculateStats(session.roundScores);
+  const cumulativeScore = Number(stats.totalScore) + session.currentRoundScore;
+
   const startSession = () => {
     setSessionStarted(true);
     setSession(InitialiseSession());
     setProcessedDarts([]);
+    setImage(null);
   };
 
   // nextRound function
   const nextRound = () => {
-  setSession((prevSession) => addRoundScore(prevSession, 0));
+  setSession((prevSession) => addRoundScore(prevSession, prevSession.currentRoundScore));
+  setImage(null);
+
+  if (session.currentRound >= totalRounds) {
+    Alert.alert("Session Complete", "You've completed all rounds!");
+  }
+
   };
+
+  
 
   // Function to request and verify permissions
   const requestPermissions = async () => {
@@ -127,10 +141,15 @@ export default function TrainingPage() {
       console.log("Processing Result:", result);
 
       // Sum all dart scores detected
-      const newTotalScore = result.scores.reduce((sum, dart) => sum + dart.score, 0);
+      const roundScore = result.scores.reduce((sum, dart) => sum + dart.score, 0);
+
+      setSession((prevSession) => ({
+        ...prevSession,
+        currentRoundScore: roundScore,
+      }));
 
       // Update the total score and processed images list
-      setTotalScore((prevScore) => prevScore + newTotalScore);
+      setTotalScore((prevScore) => prevScore + roundScore);
 
       // Add processed darts to list
       setProcessedDarts((prevDarts) => [
@@ -147,11 +166,42 @@ export default function TrainingPage() {
     }
   };
 
+  // Save the training session to Firestore under the user's UID
+  const saveSession = async () => {
+    // Compile final scores (make sure to include the current round score if not already added)
+    const finalScores = session.roundScores.concat(session.currentRoundScore);
+    const finalStats = calculateStats(finalScores);
+    const sessionData = {
+      rounds: totalRounds,
+      scores: finalScores,
+      totalScore: finalScores.reduce((sum, score) => sum + score, 0),
+      averageScore: finalStats.averageScore,
+      highestScore: finalStats.highestScore,
+      lowestScore: finalStats.lowestScore,
+    };
+
+    try {
+      // Retrieve current user's UID from Firebase Auth
+      const auth = getAuth();
+      const uid = auth.currentUser.uid;
+      await saveTrainingSession(uid, sessionData);
+      Alert.alert("Success", "Training session saved successfully!");
+      // Reset session state after saving
+      setSessionStarted(false);
+      setSession(InitialiseSession());
+      setProcessedDarts([]);
+      setImage(null);
+    } catch (error) {
+      console.error("Save Session Error:", error);
+      Alert.alert("Error", "Failed to save session");
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Training Section</Text>
 
-      {!sessionStarted && (
+      {!sessionStarted ?(
         <View style={styles.sessionSetup}>
         <Text>Select Number of Rounds: {totalRounds}</Text>
         
@@ -163,19 +213,36 @@ export default function TrainingPage() {
          value={totalRounds}
          onValueChange={(value) => setTotalRounds(value)}
          />
-         <Button title="Start Session" onPress={() => { setSessionStarted(true); setSession(InitialiseSession()); }} />
+         <Button title="Start Session" onPress={startSession}   />
+        </View>
+      ):(
+
+        <View style={styles.sessionContainer}>
+          <Text style={styles.roundInfo}>
+            Round {session.currentRound} of {totalRounds}
+          </Text>
+          <Button title="Pick an Image 📂" onPress={pickImage} />
+          {uploading && <Text>Uploading...</Text>}
+          {image && <Image source={{ uri: image }} style={styles.image} />}
+          <Text style={styles.totalScore}>Cumulative Score: {cumulativeScore}</Text>
+          {/* Render session control buttons */}
+          {session.currentRound < totalRounds ? (
+            <Button
+              title="Next Round"
+              onPress={nextRound}
+              disabled={session.currentRoundScore === 0}
+            />
+          ):(
+            session.currentRoundScore > 0 && (
+              <Button
+                title="Save Session"
+                onPress={saveSession}
+                disabled={session.currentRoundScore === 0}
+              />  
+            )
+          )}
         </View>
       )}
-      
-      <View style={styles.sessionContainer}>
-      <Text style={styles.roundInfo}>Round: {session.currentRound} of {totalRounds}</Text>
-      <Button title="Pick an Image📂" onPress={pickImage} />
-      {uploading && <Text>Uploading...</Text>}
-      {image && (<Image source={{ uri: image }} style={styles.image} />)}     
-      <Text style={styles.totalScore}>Total Score: {totalScore}</Text>
-      {session.currentRound < totalRounds && (<Button title="Next Round" onPress={nextRound} />
-)}
-      </View>
 
       <View style={styles.resultContainer}>
         <Text style={styles.resultTitle}>Processed Images:</Text>
@@ -189,6 +256,7 @@ export default function TrainingPage() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -198,6 +266,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  sessionSetup: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  sessionContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  roundInfo: {
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
   },
