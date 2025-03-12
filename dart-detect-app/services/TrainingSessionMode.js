@@ -16,7 +16,23 @@ export const AddRoundScore = (session, score) => {
         roundScores: newRoundScores,
         currentRoundScore: 0,
     };
+};  
+
+// Calculate stats for round scores
+export const CalculateStats = (roundScores) => {
+  const totalScore = roundScores.reduce((sum, score) => sum + score, 0);
+  const averageScore = roundScores.length > 0 ? (totalScore / roundScores.length).toFixed(2) : 0;
+  const highestScore = roundScores.length > 0 ? Math.max(...roundScores) : 0;
+  const lowestScore = roundScores.length > 0 ? Math.min(...roundScores) : 0
+
+  return {
+    totalScore,
+    averageScore,
+    highestScore,
+    lowestScore,
+    };
 };
+
 
 
 
