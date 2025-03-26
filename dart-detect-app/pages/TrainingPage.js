@@ -225,6 +225,10 @@ export default function TrainingPage() {
           {uploading && <Text>Uploading...</Text>}
           {image && <Image source={{ uri: image }} style={styles.image} />}
           <Text style={styles.totalScore}>Cumulative Score: {cumulativeScore}</Text>
+          <Text style={styles.statText}>Average Score: {stats.averageScore}</Text>
+          <Text style={styles.statText}>Highest Score: {stats.highestScore}</Text>
+          <Text style={styles.statText}>Lowest Score: {stats.lowestScore}</Text>
+          
           {/* Render session control buttons */}
           {session.currentRound < totalRounds ? (
             <Button
@@ -310,4 +314,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 5,
   },
+  statText: {
+    fontSize: 16,
+    marginTop: 5,
+  },
+  
 });
