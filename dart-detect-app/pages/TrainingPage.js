@@ -43,7 +43,6 @@ export default function TrainingPage() {
   };
 
   
-
   // Function to request and verify permissions
   const requestPermissions = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
