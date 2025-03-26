@@ -1,7 +1,9 @@
 // pages/PlayPage.js
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Button, Image } from "react-native";
+import { View, Text, StyleSheet, Button, Image, Alert, ScrollView  } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { getAuth } from "firebase/auth";
+import { savePlaySession } from "../services/firestoreDatabase";
 
 const STARTING_SCORE = 501;
 
@@ -12,9 +14,12 @@ export default function PlayPage() {
     { name: "P1", score: STARTING_SCORE,history:[] },
     { name: "P2", score: STARTING_SCORE,history:[] },
   ]);
-
-  // Store the selected image
-  const [image, setImage] = useState(null);
+ 
+  const [image, setImage] = useState(null);  // Store the selected image
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  
+  const currentPlayer = players[currentPlayerIndex];
 
   // Function to request and verify permissions
   const requestPermissions = async () => {
@@ -39,14 +44,123 @@ export default function PlayPage() {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      console.log("Selected Image URI:", result.assets[0].uri);
+      await uploadImage(result.assets[0].uri);
+    }
+  };
+
+  // Function to upload the image to S3 via the Flask backend
+  const uploadImage = async (uri) => {
+    try {
+      setUploading(true);
+      const filename = `image_${Date.now()}.jpg`;
+
+      // Request pre-signed URL
+      const presignedResponse = await fetch(
+        `http://localhost:5001/get_presigned_url?filename=${filename}&content_type=image/jpeg`
+      );
+      const presignedData = await presignedResponse.json();
+      if (!presignedResponse.ok) {
+        throw new Error(presignedData.error || "Failed to get pre-signed URL");
+      }
+      const presignedUrl = presignedData.url;
+
+      // Upload the image to S3 using the pre-signed URL
+      const file = await fetch(uri);
+      const blob = await file.blob();
+      const uploadResponse = await fetch(presignedUrl, {
+        method: "PUT",
+        body: blob,
+        headers: { "Content-Type": "image/jpeg" },
+      });
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload image to S3");
+      }
+      Alert.alert("Success", "Image uploaded successfully!");
+      
+      // Process the image on the backend
+      await processImage(filename);
+    } catch (error) {
+      console.error("Upload Error:", error);
+      Alert.alert("Error", error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Function to process the image in the backend
+  const processImage = async (filename) => {
+    try {
+      const response = await fetch("http://localhost:5001/process_image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Processing failed.");
+      }
+      console.log("Processing Result:", result);
+
+      // Add the scores from detected darts
+      const roundScore = result.scores.reduce((sum, dart) => sum + dart.score, 0);
+
+      // Update the player's state
+      setPlayers((prevPlayers) => {
+        const updatedPlayers = [...prevPlayers];
+        const current = updatedPlayers[currentPlayerIndex];
+        const newScore = Math.max(0, current.score - roundScore);
+        updatedPlayers[currentPlayerIndex] = {
+          ...current,
+          score: newScore,
+          history: [
+            ...current.history,
+            ...result.scores.map((dartObj) => ({
+              image: result.filename,
+              score: dartObj.score,
+            })),
+          ],
+        };
+
+        if (newScore === 0) {
+          Alert.alert("Game Over", `${current.name} wins!`);
+          saveGameResult(updatedPlayers);
+        } else {
+          // Switch to the other player's turn
+          setCurrentPlayerIndex((prevIndex) => (prevIndex === 0 ? 1 : 0));
+        }
+        return updatedPlayers;
+      });
+    } catch (error) {
+      console.error("Processing Error:", error);
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  const saveGameResult = async (finalPlayers) => {
+    try {
+      const auth = getAuth();
+      const uid = auth.currentUser.uid;
+      for (const player of finalPlayers) {
+        await savePlaySession(uid, {
+          name: player.name,
+          totalScore: STARTING_SCORE - player.score,
+          averageScore: ((STARTING_SCORE - player.score) / player.history.length).toFixed(2),
+          rounds: player.history.length,
+          scoreHistory: player.history,
+        });
+      }
+    } catch (err) {
+      console.error("Save Error:", err);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Play Mode - 501</Text>
       {image && <Image source={{ uri: image }} style={styles.image} />}
-      <Button title="Pick Image 📂" onPress={pickImage} />
+      <Button title="Pick Image 📂" onPress={pickImage} disabled={uploading}/>
+      {uploading && <Text>Uploading...</Text>}
       <View style={styles.scoreRow}>
         {players.map((player, index) => (
           <View key={index} style={styles.scoreBox}>
@@ -56,14 +170,13 @@ export default function PlayPage() {
           </View>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "center",
+    flexGrow: 1,
     alignItems: "center",
     padding: 20,
   },
