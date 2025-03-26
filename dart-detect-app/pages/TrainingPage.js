@@ -149,7 +149,7 @@ export default function TrainingPage() {
       }));
 
       // Update the total score and processed images list
-      setTotalScore((prevScore) => prevScore + roundScore);
+      //setTotalScore((prevScore) => prevScore + roundScore);
 
       // Add processed darts to list
       setProcessedDarts((prevDarts) => [
