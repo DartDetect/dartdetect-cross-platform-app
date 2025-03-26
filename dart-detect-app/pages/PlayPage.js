@@ -2,11 +2,28 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
+const STARTING_SCORE = 501;
+
+
 export default function PlayPage() {
+
+  const [players, setPlayers] = React.useState([
+    { name: "P1", score: STARTING_SCORE,history:[] },
+    { name: "P2", score: STARTING_SCORE,history:[] },
+  ]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Play Mode - 501</Text>
-      <Text>Features for playing will be added here.</Text>
+      <View style={styles.scoreRow}>
+        {players.map((player, index) => (
+          <View key={index} style={styles.scoreBox}>
+            <Text style={styles.scoreText}>
+              {player.name}: {player.score}
+            </Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -19,8 +36,22 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  scoreRow: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  scoreBox: {
+    flex: 1,
+    alignItems: "center",
+  },
+  scoreText: {
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });
