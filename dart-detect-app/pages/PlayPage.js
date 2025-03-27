@@ -158,18 +158,36 @@ export default function PlayPage() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Play Mode - 501</Text>
+
       {image && <Image source={{ uri: image }} style={styles.image} />}
       <Button title="Pick Image 📂" onPress={pickImage} disabled={uploading}/>
       {uploading && <Text>Uploading...</Text>}
+
       <View style={styles.scoreRow}>
         {players.map((player, index) => (
           <View key={index} style={styles.scoreBox}>
             <Text style={styles.scoreText}>
               {player.name}: {player.score}
-            </Text>
+            </Text>            
           </View>
         ))}
       </View>
+
+    {/* Processed Scores Section */}
+    <View style={styles.historyContainer}>
+      <Text style={styles.historyTitle}>Processed Scores:</Text>
+      <ScrollView style={styles.historyScroll} nestedScrollEnabled={true}>
+        {players.map((player, pIndex) =>
+          player.history.map((round, rIndex) => (
+            <View key={`${pIndex}-${rIndex}`} style={styles.historyItem}>
+              <Text style={styles.scoreHistoryText}>
+                🎯 {player.name} - Score: {round.score} (Image: {round.image})
+              </Text>
+            </View>
+          ))
+        )}
+      </ScrollView>
+    </View>
     </ScrollView>
   );
 }
@@ -203,5 +221,33 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     marginBottom: 20,
+  },
+  historyContainer: {
+    width: "100%",
+    marginTop: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    backgroundColor: "#f9f9f9",
+  },
+  historyTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  historyScroll: {
+    maxHeight: 150,
+  },
+  historyItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+  scoreHistoryText: {
+    fontSize: 14,
+    flex: 1,
+    marginRight: 5,
   },
 });
