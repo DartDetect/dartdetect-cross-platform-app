@@ -9,7 +9,7 @@ import { doc, getDoc } from "firebase/firestore";
 
 export default function Dashboard() {
   const[userData, setUserData] = useState({name: "", nationality: ""}); // Store user's name and nationality
-  
+  const [loading, setLoading] = useState(true); //Loading state
 
   // Function to handle user logout
   const handleLogout = async () => {
