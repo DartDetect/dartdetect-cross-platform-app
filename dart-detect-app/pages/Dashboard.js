@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Button, Alert, useWindowDimensions } from "react-native";
+import { View, Text, StyleSheet, Button, Alert, useWindowDimensions, ScrollView } from "react-native";
 import { signOut } from "firebase/auth";
 import {db, auth } from "../services/firebaseConfig";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -54,23 +54,27 @@ export default function Dashboard() {
   }
 
   return (
-    <View style={styles.container}>
-     
-      <Text style={styles.welcome}>Welcome to Dart Detect Dashboard!</Text>
-      <Text style={styles.userInfo}>
-        You are logged in as: {auth.currentUser?.email}
-      </Text> 
-
-      
-        <Button title="Logout" onPress={handleLogout} />
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+    
+      <Text style={styles.welcome}>Welcome, {userData.name}!</Text>
+      <Text style={styles.userInfo}>Nationality: {userData.nationality}</Text> 
+      <View style={styles.placeholder}>
+        <Text>Game stats and features will go here</Text>
+      </View>
+      <Button title="Logout" onPress={handleLogout} />
+    </ScrollView>
   );
 }
 
 // Component Stylesheet
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  container: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
