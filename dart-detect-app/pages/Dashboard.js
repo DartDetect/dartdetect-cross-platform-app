@@ -1,12 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet, Button, Alert, useWindowDimensions } from "react-native";
 import { signOut } from "firebase/auth";
-import { auth } from "../services/firebaseConfig";
+import {db, auth } from "../services/firebaseConfig";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
+import { doc, getDoc } from "firebase/firestore";
 
 
-export default function Dashboard({ navigation }) {
+export default function Dashboard() {
   
   // Function to handle user logout
   const handleLogout = async () => {

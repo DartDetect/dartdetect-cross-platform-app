@@ -249,6 +249,10 @@ export default function PlayPage() {
     {/* Action Buttons Section*/}
     <View style={styles.footer}>
         <View style={styles.buttonRow}>
+          
+          <Button title="📷" onPress={() => {}}  />
+        </View>
+        <View style={styles.buttonRow}>
           <Button title="UNDO" onPress={() => {}}  />
           <Button title="BUST" onPress={() => {}}  />
         </View>
