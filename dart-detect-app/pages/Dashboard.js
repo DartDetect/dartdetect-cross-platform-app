@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Button, Alert, useWindowDimensions } from "react-native";
 import { signOut } from "firebase/auth";
 import {db, auth } from "../services/firebaseConfig";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { doc, getDoc } from "firebase/firestore";
+
+
 
 
 export default function Dashboard() {
@@ -22,6 +24,35 @@ export default function Dashboard() {
     }
   };
 
+  // useEffect to fetch user data from Firestore
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const userDocRef = doc(db, "users", auth.currentUser.uid); // Get referenceto user document in Firestore
+        const userDoc = await getDoc(userDocRef); // Fetch user document
+        // Check if doducment exists and set user data
+        if (userDoc.exists()) {
+          setUserData(userDoc.data());
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        Alert.alert("Error", "Failed to load user data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
+  }, []);
+
+  // If data is loading show loadinf screen
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading Dashboard...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
      
@@ -30,9 +61,7 @@ export default function Dashboard() {
         You are logged in as: {auth.currentUser?.email}
       </Text> 
 
-      <View style={styles.placeholder}>
-        <Text>Game stats and features coming soon!</Text>
-      </View>
+      
         <Button title="Logout" onPress={handleLogout} />
     </View>
   );
