@@ -1,6 +1,6 @@
 // pages/PlayPage.js
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Button, Image, Alert, ScrollView  } from "react-native";
+import { View, Text, StyleSheet, Button, Image, Alert, ScrollView,TextInput } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { getAuth } from "firebase/auth";
 import { savePlaySession } from "../services/firestoreDatabase";
@@ -20,6 +20,28 @@ export default function PlayPage() {
   const [uploading, setUploading] = useState(false);
   
   const currentPlayer = players[currentPlayerIndex];
+
+  const [editingScore, setEditingScore] = useState(null); // New state for inline editing
+  const [manualScore, setManualScore] = useState(""); // New state for the input value
+
+   // New helper function for inline editing
+   const handleScoreEdit = (playerIndex, scoreIndex, newScore) => {
+    setPlayers((prevPlayers) => {
+      const updatedPlayers = [...prevPlayers];
+      const player = updatedPlayers[playerIndex];
+      const newHistory = [...player.history];
+      newHistory[scoreIndex] = { ...newHistory[scoreIndex], score: newScore };
+      const totalScored = newHistory.reduce((sum, dartObj) => sum + dartObj.score, 0);
+      updatedPlayers[playerIndex] = {
+        ...player,
+        history: newHistory,
+        score: Math.max(STARTING_SCORE - totalScored, 0),
+      };
+      return updatedPlayers;
+    });
+    setEditingScore(null);
+    setManualScore("");
+  };
 
   // Function to request and verify permissions
   const requestPermissions = async () => {
@@ -173,19 +195,52 @@ export default function PlayPage() {
         ))}
       </View>
 
-    {/* Processed Scores Section */}
+        {/* Processed Scores Section */}
     <View style={styles.historyContainer}>
       <Text style={styles.historyTitle}>Processed Scores:</Text>
       <ScrollView style={styles.historyScroll} nestedScrollEnabled={true}>
         {players.map((player, pIndex) =>
-          player.history.map((round, rIndex) => (
-            <View key={`${pIndex}-${rIndex}`} style={styles.historyItem}>
-              <Text style={styles.scoreHistoryText}>
-                🎯 {player.name} - Score: {round.score} (Image: {round.image})
-              </Text>
-            </View>
-          ))
-        )}
+          player.history.map((round, rIndex) => {
+            const isEditing =
+              editingScore &&
+              editingScore.playerIndex === pIndex &&
+              editingScore.scoreIndex === rIndex;
+            return (
+              <View key={`${pIndex}-${rIndex}`} style={styles.historyItem}>
+                {isEditing ? (
+                  <>
+                    <TextInput
+                      style={styles.input}
+                      keyboardType="numeric"
+                      value={manualScore}
+                      onChangeText={(text) => setManualScore(text)}
+                    />
+                    <Button 
+                      title="Save"
+                      onPress={() =>
+                        handleScoreEdit(pIndex, rIndex, parseInt(manualScore) || 0)
+                      }
+                    />  
+                    </>
+                ) : (
+                  <>
+                    <Text style={styles.scoreHistoryText}>
+                      🎯 {player.name} - Score: {round.score} (Image: {round.image})
+                    </Text>
+                    <Button 
+                    title="Edit"
+                    onPress={() => {
+                      setEditingScore({ playerIndex: pIndex, scoreIndex: rIndex });
+                      setManualScore(round.score.toString());
+                    
+                    }}
+                    />
+                  </>
+                )}
+              </View>
+            );    
+      })
+      )}
       </ScrollView>
     </View>
     </ScrollView>
@@ -249,5 +304,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
     marginRight: 5,
+  },
+  input: {
+    width: 60,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    padding: 4,
+    marginRight: 5,
+    textAlign: "center",
   },
 });
