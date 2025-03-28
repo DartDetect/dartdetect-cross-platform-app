@@ -178,6 +178,7 @@ export default function PlayPage() {
   };
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Play Mode - 501</Text>
 
@@ -242,8 +243,21 @@ export default function PlayPage() {
       })
       )}
       </ScrollView>
-    </View>
+    </View>   
     </ScrollView>
+
+    {/* Action Buttons Section*/}
+    <View style={styles.footer}>
+        <View style={styles.buttonRow}>
+          <Button title="UNDO" onPress={() => {}}  />
+          <Button title="BUST" onPress={() => {}}  />
+        </View>
+        <View style={styles.buttonRow}>
+          <Button title="Start" onPress={() => {}}  />
+          <Button title="Reset" onPress={() => {}}  />
+        </View>
+      </View>
+    </View>
   );
 }
 
@@ -312,5 +326,21 @@ const styles = StyleSheet.create({
     padding: 4,
     marginRight: 5,
     textAlign: "center",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
+    padding: 10,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginTop: 10,
   },
 });
