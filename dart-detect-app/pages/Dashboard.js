@@ -52,10 +52,13 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchTrainingStats() {
       try {
+        // Firestore query to get training sessions for the current user
         const q = query(
           collection(db, "trainingSessions"),
           where("uid", "==", auth.currentUser.uid)
         );
+
+        // Execute the query
         const snapshot = await getDocs(q);
   
         if (snapshot.empty) {
@@ -66,17 +69,20 @@ export default function Dashboard() {
           return;
         }
   
+        // Calculate total rounds and average of averages
         let totalRounds = 0;
         let totalAverageSum = 0;
         let sessionCount = 0;
   
+        // Iterate through each document in the snapshot
         snapshot.forEach((doc) => {
           const data = doc.data();
-          totalRounds += Number(data.rounds || 0);
-          totalAverageSum += Number(data.averageScore || 0);
-          sessionCount++;
+          totalRounds += Number(data.rounds || 0); // Add rounds to total
+          totalAverageSum += Number(data.averageScore || 0); // Add average score to total
+          sessionCount++; // Count the number of sessions
         });
   
+        // Update the training stats state
         setTrainingStats({
           totalRounds,
           averageOfAverages: (totalAverageSum / sessionCount).toFixed(2),
