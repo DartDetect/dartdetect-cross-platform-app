@@ -1,7 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { LineChart } from "react-native-chart-kit";
+import { useWindowDimensions } from "react-native";
+
+
 
 export default function TrainingChart({ chartData }) {
+  const { width } = useWindowDimensions();
     // Show fallback if no data
     if (!chartData || chartData.length === 0) {
       return (
@@ -11,10 +16,58 @@ export default function TrainingChart({ chartData }) {
       );
     }
   
-    return null; 
+    return (
+      <View style={styles.container}>
+        <Text style={styles.chartTitle}>Average Score per Session</Text>
+        <LineChart
+          data={{
+            labels: chartData.map((_, index) => `#${index + 1}`),
+            datasets: [
+              {
+                data: chartData,
+              },
+            ],
+          }}
+          width={width - 40} // full width minus padding
+          height={220}
+          yAxisSuffix=""
+          chartConfig={{
+            backgroundColor: "#ffffff",
+            backgroundGradientFrom: "#f1f1f1",
+            backgroundGradientTo: "#f1f1f1",
+            decimalPlaces: 1,
+            color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            style: {
+              borderRadius: 8,
+            },
+            propsForDots: {
+              r: "4",
+              strokeWidth: "2",
+              stroke: "#007AFF",
+            },
+          }}
+          style={{
+            marginVertical: 12,
+            borderRadius: 8,
+          }}
+        />
+      </View>
+    );
   }
   
+  
   const styles = StyleSheet.create({
+    container: {
+      padding: 10,
+      alignItems: "center",
+    },
+    chartTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 10,
+      textAlign: "center",
+    },
     noDataContainer: {
       padding: 20,
       alignItems: "center",

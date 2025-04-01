@@ -5,18 +5,16 @@ import {db, auth } from "../services/firebaseConfig";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { doc, getDoc,collection,query,where,getDocs } from "firebase/firestore";
-
-
-
+import TrainingChart from "../services/TrainingChart";
 
 export default function Dashboard() {
   const[userData, setUserData] = useState({name: "", nationality: ""}); // Store user's name and nationality
   const [loading, setLoading] = useState(true); //Loading state
 
-  const [trainingStats, setTrainingStats] = useState({ // Store training stats
-    totalRounds: 0,
-    averageOfAverages: "N/A",
-  }); 
+  const [trainingStats, setTrainingStats] = useState({ totalRounds: 0, averageOfAverages: "N/A",}); 
+
+  const [chartData, setChartData] = useState([]);
+
 
   // Function to handle user logout
   const handleLogout = async () => {
@@ -73,12 +71,14 @@ export default function Dashboard() {
         let totalRounds = 0;
         let totalAverageSum = 0;
         let sessionCount = 0;
+        let sessionAverages = [];
   
         // Iterate through each document in the snapshot
         snapshot.forEach((doc) => {
           const data = doc.data();
           totalRounds += Number(data.rounds || 0); // Add rounds to total
           totalAverageSum += Number(data.averageScore || 0); // Add average score to total
+          sessionAverages.push(Number(data.averageScore || 0)); // Store average score for chart data
           sessionCount++; // Count the number of sessions
         });
   
@@ -87,6 +87,9 @@ export default function Dashboard() {
           totalRounds,
           averageOfAverages: (totalAverageSum / sessionCount).toFixed(2),
         });
+
+        setChartData(sessionAverages); // Set chart data for the training chart
+
       } catch (error) {
         console.error("Error fetching training stats:", error);
         Alert.alert("Error", "Failed to load training stats.");
@@ -118,6 +121,8 @@ export default function Dashboard() {
         <Text style={styles.statsText}>
           Average Score Across Sessions: {trainingStats.averageOfAverages}
         </Text>
+        <TrainingChart chartData={chartData} />
+
       </View>
       <Button title="Logout" onPress={handleLogout} />
     </ScrollView>
