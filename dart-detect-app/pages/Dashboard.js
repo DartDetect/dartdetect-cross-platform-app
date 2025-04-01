@@ -121,7 +121,9 @@ export default function Dashboard() {
         <Text style={styles.statsText}>
           Average Score Across Sessions: {trainingStats.averageOfAverages}
         </Text>
+        <View style={styles.chartContainer}>
         <TrainingChart chartData={chartData} />
+        </View>
 
       </View>
       <Button title="Logout" onPress={handleLogout} />
@@ -181,6 +183,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     marginBottom: 5,
+  },
+  chartContainer: {
+    marginTop: 20,
+    padding: 10,
+    //backgroundColor: "#fff",
+    borderRadius: 8,
+    width: "100%",
   },
   
 });
