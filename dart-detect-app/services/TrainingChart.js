@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import { useWindowDimensions } from "react-native";
+import { Dimensions } from "react-native";
 
 
 
 export default function TrainingChart({ chartData }) {
-  const { width } = useWindowDimensions();
+  const { width } = Dimensions.get("window");
     // Show fallback if no data
     if (!chartData || chartData.length === 0) {
       return (

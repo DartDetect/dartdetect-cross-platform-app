@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Button, Alert, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Button, Alert, ScrollView, SafeAreaView } from "react-native";
 import { signOut } from "firebase/auth";
 import {db, auth } from "../services/firebaseConfig";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -111,6 +111,7 @@ export default function Dashboard() {
   }
 
   return (
+    <SafeAreaView style={styles.safeArea}>
     <ScrollView contentContainerStyle={styles.container}>
     
       <Text style={styles.welcome}>Welcome, {userData.name}!</Text>
@@ -140,11 +141,17 @@ export default function Dashboard() {
 
       <Button title="Logout" onPress={handleLogout} />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 // Component Stylesheet
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f9f9f9", 
+  },
+  
   loadingContainer: {
     flex: 1,
     alignItems: "center",

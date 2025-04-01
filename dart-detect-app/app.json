@@ -8,6 +8,11 @@
     },
     "ios": {
       "bundleIdentifier": "com.jakubszkup1.dartdetectapp"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fd5cddb5-224c-439b-906c-52cc39076840"
+      }
     }
   }
 }
