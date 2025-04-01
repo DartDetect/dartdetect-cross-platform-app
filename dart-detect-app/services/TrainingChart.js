@@ -29,7 +29,7 @@ export default function TrainingChart({ chartData }) {
             ],
           }}
           width={width - 40} // full width minus padding
-          height={220}
+          height={180}
           yAxisSuffix=""
           chartConfig={{
             backgroundColor: "#ffffff",

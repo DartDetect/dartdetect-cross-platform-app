@@ -7,6 +7,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { doc, getDoc,collection,query,where,getDocs } from "firebase/firestore";
 import TrainingChart from "../services/TrainingChart";
 
+
 export default function Dashboard() {
   const[userData, setUserData] = useState({name: "", nationality: ""}); // Store user's name and nationality
   const [loading, setLoading] = useState(true); //Loading state
@@ -14,6 +15,7 @@ export default function Dashboard() {
   const [trainingStats, setTrainingStats] = useState({ totalRounds: 0, averageOfAverages: "N/A",}); 
 
   const [chartData, setChartData] = useState([]);
+
 
 
   // Function to handle user logout
@@ -113,7 +115,10 @@ export default function Dashboard() {
     
       <Text style={styles.welcome}>Welcome, {userData.name}!</Text>
       <Text style={styles.userInfo}>Nationality: {userData.nationality}</Text> 
-      <View style={styles.statsContainer}>
+      
+      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollWrapper}>
+
+      <View style={styles.card}>
        <Text style={styles.statsTitle}>Training Stats</Text>
         <Text style={styles.statsText}>
           Total Rounds Played: {trainingStats.totalRounds}
@@ -124,8 +129,15 @@ export default function Dashboard() {
         <View style={styles.chartContainer}>
         <TrainingChart chartData={chartData} />
         </View>
-
       </View>
+
+      {/* Play Mode Stats Card */}
+      <View style={styles.card}>
+        <Text style={styles.statsTitle}>Play Mode Stats</Text>
+        <Text style={styles.statsText}>Coming soon...</Text>
+      </View>
+    </ScrollView>
+
       <Button title="Logout" onPress={handleLogout} />
     </ScrollView>
   );
@@ -187,9 +199,28 @@ const styles = StyleSheet.create({
   chartContainer: {
     marginTop: 20,
     padding: 10,
-    //backgroundColor: "#fff",
     borderRadius: 8,
     width: "100%",
+    overflow: "hidden",
+  },
+  
+  scrollWrapper: {
+    paddingVertical: 10,
+  },
+  
+  card: {
+    width: 320,
+    marginHorizontal: 10,
+    padding: 12,
+    borderRadius: 16,
+    backgroundColor: "#f1f1f1",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    alignItems: "center",
+    minHeight: 400,
   },
   
 });
