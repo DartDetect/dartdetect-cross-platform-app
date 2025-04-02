@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Button, Image, Alert, ScrollView,TextInput } fr
 import * as ImagePicker from "expo-image-picker";
 import { getAuth } from "firebase/auth";
 import { savePlaySession } from "../services/firestoreDatabase";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const STARTING_SCORE = 501;
 
@@ -178,7 +179,7 @@ export default function PlayPage() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Play Mode - 501</Text>
 
@@ -261,7 +262,7 @@ export default function PlayPage() {
           <Button title="Reset" onPress={() => {}}  />
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
