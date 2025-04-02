@@ -6,8 +6,10 @@ import { getAuth } from "firebase/auth";
 import { savePlaySession } from "../services/firestoreDatabase";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const STARTING_SCORE = 501;
+// import button functions from the buttons folder
+import { handleReset } from "../services/Buttons/reset";
 
+const STARTING_SCORE = 501;
 
 export default function PlayPage() {
 
@@ -259,7 +261,7 @@ export default function PlayPage() {
         </View>
         <View style={styles.buttonRow}>
           <Button title="Start" onPress={() => {}}  />
-          <Button title="Reset" onPress={() => {}}  />
+          <Button title="Reset" onPress={() => handleReset(setPlayers, setCurrentPlayerIndex)}  />
         </View>
       </View>
     </SafeAreaView>
