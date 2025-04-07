@@ -19,6 +19,9 @@ export default function PlayPage() {
     { name: "P1", score: STARTING_SCORE,history:[] },
     { name: "P2", score: STARTING_SCORE,history:[] },
   ]);
+
+  const [playerNamesSet, setPlayerNamesSet] = useState(false);
+  const [playerNameInputs, setPlayerNameInputs] = useState(["", ""]);
  
   const [image, setImage] = useState(null);  // Store the selected image
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
@@ -187,6 +190,36 @@ export default function PlayPage() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Play Mode - 501</Text>
 
+      {!playerNamesSet ? (
+  <View style={styles.nameInputContainer}>
+    <Text style={styles.nameInputTitle}>Enter Player Names</Text>
+    {[0, 1].map((i) => (
+      <TextInput
+        key={i}
+        style={styles.nameInputField}
+        placeholder={`Player ${i + 1} Name`}
+        value={playerNameInputs[i]}
+        onChangeText={(text) => {
+          const updated = [...playerNameInputs];
+          updated[i] = text;
+          setPlayerNameInputs(updated);
+        }}
+      />
+    ))}
+    <Button
+      title="Start Game"
+      onPress={() => {
+        setPlayers([
+          { name: playerNameInputs[0] || "Player 1", score: STARTING_SCORE, history: [] },
+          { name: playerNameInputs[1] || "Player 2", score: STARTING_SCORE, history: [] },
+        ]);
+        setPlayerNamesSet(true);
+      }}
+    />
+  </View>
+) : (
+  <>
+
       {image && <Image source={{ uri: image }} style={styles.image} />}
       <Button title="Pick Image 📂" onPress={pickImage} disabled={uploading}/>
       {uploading && <Text>Uploading...</Text>}
@@ -249,6 +282,8 @@ export default function PlayPage() {
       )}
       </ScrollView>
     </View>   
+    </>
+)}
     </ScrollView>
 
     {/* Action Buttons Section*/}
@@ -262,7 +297,7 @@ export default function PlayPage() {
 
         </View>
         <View style={styles.buttonRow}>
-          <Button title="Start" onPress={() => {}}  />
+
           <Button title="Reset" onPress={() => handleReset(setPlayers, setCurrentPlayerIndex)}  />
         </View>
       </View>
@@ -352,4 +387,32 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 10,
   },
+
+  nameInputContainer: {
+    width: "100%",
+    marginBottom: 20,
+    padding: 16,
+    backgroundColor: "#f1f1f1",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  
+  nameInputTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  
+  nameInputField: {
+    width: "100%",
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+  },
+  
 });
