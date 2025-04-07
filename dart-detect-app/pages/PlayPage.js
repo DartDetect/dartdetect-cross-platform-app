@@ -8,6 +8,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 // import button functions from the buttons folder
 import { handleReset } from "../services/Buttons/reset";
+import { handleUndo } from "../services/Buttons/undo";
+
 
 const STARTING_SCORE = 501;
 
@@ -256,8 +258,8 @@ export default function PlayPage() {
           <Button title="📷" onPress={() => {}}  />
         </View>
         <View style={styles.buttonRow}>
-          <Button title="UNDO" onPress={() => {}}  />
-          <Button title="BUST" onPress={() => {}}  />
+          <Button title="UNDO" onPress={() => handleUndo(currentPlayerIndex, setPlayers)}  />
+
         </View>
         <View style={styles.buttonRow}>
           <Button title="Start" onPress={() => {}}  />
