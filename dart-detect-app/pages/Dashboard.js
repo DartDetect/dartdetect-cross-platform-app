@@ -4,7 +4,7 @@ import { signOut } from "firebase/auth";
 import {db, auth } from "../services/firebaseConfig";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import { doc, getDoc,collection,query,where,getDocs } from "firebase/firestore";
+import { doc, getDoc,collection,query,where,getDocs,orderBy, limit } from "firebase/firestore";
 import TrainingChart from "../services/TrainingChart";
 import PlayChart from "../services/PlayChart"; 
 
@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [trainingStats, setTrainingStats] = useState({ totalRounds: 0, averageOfAverages: "N/A",}); 
   const [chartData, setChartData] = useState([]);
 
-  const [playStats, setPlayStats] = useState({totalGames: 0, averageOfAverages: 0,});
+  const [playStats, setPlayStats] = useState([]); // Store play session stats
   const [playChartData, setPlayChartData] = useState([]);
 
 
@@ -103,6 +103,62 @@ export default function Dashboard() {
     fetchTrainingStats();
   }, []);
 
+  
+  useEffect(() => {
+    async function fetchPlayStats() {
+      try {
+        const q = query(
+          collection(db, "playSessions"),
+          where("uid", "==", auth.currentUser.uid),
+          orderBy("timestamp", "desc")
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          console.log("No play session found.");
+          return;
+        }
+        
+        const playerStats = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const existingPlayer = playerStats.find(player => player.name === data.name);
+          
+          if (existingPlayer) {
+            existingPlayer.totalGames += 1;
+            existingPlayer.rounds += data.rounds;
+            existingPlayer.totalScore += data.totalScore;
+            existingPlayer.scores.push(data.averageScore);
+          } else {
+            playerStats.push({
+              name: data.name,
+              totalGames: 1,
+              rounds: data.rounds,
+              totalScore: data.totalScore,
+              averageScore: data.averageScore,
+              scores: [data.averageScore], // Store all scores per round
+            });
+          }
+        });
+  
+        // Calculate the correct average of averages
+        playerStats.forEach(player => {
+          // Calculate average of all scores for the player
+          const totalScore = player.scores.reduce((sum, score) => sum + score, 0);
+          player.averageOfAverages = (totalScore / player.scores.length).toFixed(2); // Update average calculation
+        });
+  
+        setPlayStats(playerStats); // Set latest play session data
+      } catch (err) {
+        console.error("Error fetching play stats:", err);
+        Alert.alert("Error", "Failed to load play stats.");
+      }
+    }
+    fetchPlayStats();
+  }, []);
+  
+
   // If data is loading show loadinf screen
   if (loading) {
     return (
@@ -136,15 +192,26 @@ export default function Dashboard() {
 
       {/* Play Mode Stats Card */}
       <View style={styles.card}>
-        <Text style={styles.statsTitle}>Play Mode Stats</Text>
-        <Text style={styles.statsText}>
-          Total Games Played: {playStats.averageOfAverages}
-        </Text>
-        <Text style={styles.statsText}>
-          Average Score: {playStats.averageOfAverages}
-        </Text>
-       
+        <Text style={styles.statsTitle}>Latest Game Stats</Text>
+        {playStats.length > 0 ? (
+          playStats.map((player, index) => (
+            <View key={index}>
+            <Text style={styles.statsTitle}>{player.name}'s Stats</Text>
+            <Text style={styles.statsText}>
+              Total Games Played: {player.totalGames}
+            </Text>
+            <Text style={styles.statsText}>
+              Rounds Played: {player.rounds}
+            </Text>
+            <Text style={styles.statsText}>
+              Average Score: {player.averageOfAverages}
+            </Text>
       </View>
+       ))
+      ) : (
+        <Text>No Play Stats Available</Text>
+      )}
+       </View>
     </ScrollView>
 
       <Button title="Logout" onPress={handleLogout} />
