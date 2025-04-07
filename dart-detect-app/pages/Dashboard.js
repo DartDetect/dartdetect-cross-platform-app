@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { doc, getDoc,collection,query,where,getDocs } from "firebase/firestore";
 import TrainingChart from "../services/TrainingChart";
+import PlayChart from "../services/PlayChart"; 
 
 
 export default function Dashboard() {
@@ -13,9 +14,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true); //Loading state
 
   const [trainingStats, setTrainingStats] = useState({ totalRounds: 0, averageOfAverages: "N/A",}); 
-
   const [chartData, setChartData] = useState([]);
 
+  const [playStats, setPlayStats] = useState({totalGames: 0, averageOfAverages: 0,});
+  const [playChartData, setPlayChartData] = useState([]);
 
 
   // Function to handle user logout
@@ -135,7 +137,13 @@ export default function Dashboard() {
       {/* Play Mode Stats Card */}
       <View style={styles.card}>
         <Text style={styles.statsTitle}>Play Mode Stats</Text>
-        <Text style={styles.statsText}>Coming soon...</Text>
+        <Text style={styles.statsText}>
+          Total Games Played: {playStats.averageOfAverages}
+        </Text>
+        <Text style={styles.statsText}>
+          Average Score: {playStats.averageOfAverages}
+        </Text>
+       
       </View>
     </ScrollView>
 
