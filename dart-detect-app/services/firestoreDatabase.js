@@ -38,3 +38,22 @@ export const saveTrainingSession = async (uid, sessionData) => {
     console.error("Error saving training session:", error);
   }
 };
+
+// Function to save a play mode session result in Firestore
+export const savePlaySession = async (uid, sessionData) => {
+  try {
+    await addDoc(collection(db, "playSessions"), {
+      uid: uid,                                   // User ID
+      name: sessionData.name,                     // Player name
+      totalScore: sessionData.totalScore,         // Total score achieved
+      averageScore: sessionData.averageScore,     // Average score per dart
+      rounds: sessionData.rounds,                 // Number of rounds played
+      scoreHistory: sessionData.scoreHistory,     // score and image info
+      timestamp: new Date(),
+    });
+    console.log("Play session saved successfully!");
+  } catch (error) {
+    console.error("Error saving play session:", error);
+  }
+};
+
