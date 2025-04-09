@@ -310,15 +310,8 @@ export default function PlayPage() {
       {/* Action Buttons Section*/}
       <View style={styles.footer}>
         <View style={styles.buttonRow}>
-
-          <Button title="📷" onPress={takePhoto} disabled={uploading} />
-        </View>
-        <View style={styles.buttonRow}>
           <Button title="UNDO" onPress={() => handleUndo(currentPlayerIndex, setPlayers)} />
-
-        </View>
-        <View style={styles.buttonRow}>
-
+          <Button title="📷" onPress={takePhoto} disabled={uploading} />
           <Button title="Reset" onPress={() => handleReset(setPlayers, setCurrentPlayerIndex)} />
         </View>
       </View>
