@@ -79,6 +79,27 @@ export default function PlayPage() {
     }
   };
 
+  // Function to take a photo
+  const takePhoto = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+  
+    if (!permissionResult.granted) {
+      Alert.alert("Permission Required", "Camera access is required.");
+      return;
+    }
+  
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+  
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      await uploadImage(result.assets[0].uri);
+    }
+  };
+  
+
   // Function to upload the image to S3 via the Flask backend
   const uploadImage = async (uri) => {
     try {
@@ -290,7 +311,7 @@ export default function PlayPage() {
     <View style={styles.footer}>
         <View style={styles.buttonRow}>
           
-          <Button title="📷" onPress={() => {}}  />
+          <Button title="📷" onPress= {takePhoto} disabled={uploading}/>
         </View>
         <View style={styles.buttonRow}>
           <Button title="UNDO" onPress={() => handleUndo(currentPlayerIndex, setPlayers)}  />
