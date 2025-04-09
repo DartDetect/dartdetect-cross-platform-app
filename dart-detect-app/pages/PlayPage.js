@@ -428,5 +428,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#fff",
   },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "centre",
+    marginTop: 10,
+  }
 
 });
