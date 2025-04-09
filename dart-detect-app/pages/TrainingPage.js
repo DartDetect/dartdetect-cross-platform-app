@@ -1,6 +1,6 @@
 // pages/TrainingPage.js
-import React ,{ useState }from "react";
-import { View, Text, StyleSheet,Button,Alert,Image,ScrollView } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Button, Alert, Image, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
 import Slider from "@react-native-community/slider";
@@ -11,10 +11,13 @@ import { saveTrainingSession } from "../services/firestoreDatabase";
 import WebCamCapture from "../services/WebCamCapture";
 import { Platform } from "react-native";
 
+import { handleTrainingReset } from "../services/Buttons/TrainingReset";
+
+
 export default function TrainingPage() {
   const [image, setImage] = useState(null); // holds selected image URI
   const [uploading, setUploading] = useState(false); // Tracks upload status
-  
+
   const [processedDarts, setProcessedDarts] = useState([]); // Holds list of processed darts
   //const [processedImages, setProcessedImages] = useState([]); // Holds list of processed image details
 
@@ -37,16 +40,16 @@ export default function TrainingPage() {
 
   // nextRound function
   const nextRound = () => {
-  setSession((prevSession) => addRoundScore(prevSession, prevSession.currentRoundScore));
-  setImage(null);
+    setSession((prevSession) => addRoundScore(prevSession, prevSession.currentRoundScore));
+    setImage(null);
 
-  if (session.currentRound >= totalRounds) {
-    Alert.alert("Session Complete", "You've completed all rounds!");
-  }
+    if (session.currentRound >= totalRounds) {
+      Alert.alert("Session Complete", "You've completed all rounds!");
+    }
 
   };
 
-  
+
   // Function to request and verify permissions
   const requestPermissions = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -79,28 +82,28 @@ export default function TrainingPage() {
   };
 
   // Function to take a photo
-    const takePhoto = async () => {
-      if (Platform.OS === "web") {
-        setShowWebcam(true); // Show webcam for photo capture
-        return;
-      }
-  
-      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-      if (!permissionResult.granted) {
-        Alert.alert("Permission Required", "Camera access is required.");
-        return;
-      }
-  
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        quality: 1,
-      });
-  
-      if (!result.canceled) {
-        setImage(result.assets[0].uri);
-        await uploadImage(result.assets[0].uri);
-      }
-    };
+  const takePhoto = async () => {
+    if (Platform.OS === "web") {
+      setShowWebcam(true); // Show webcam for photo capture
+      return;
+    }
+
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Permission Required", "Camera access is required.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      await uploadImage(result.assets[0].uri);
+    }
+  };
 
   // Function to upload the image to S3 via the Flask backend
   const uploadImage = async (uri) => {
@@ -228,21 +231,21 @@ export default function TrainingPage() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Training Section</Text>
 
-      {!sessionStarted ?(
+      {!sessionStarted ? (
         <View style={styles.sessionSetup}>
-        <Text>Select Number of Rounds: {totalRounds}</Text>
-        
-        <Slider
-         style={{ width: 200, height: 40 }}
-         minimumValue={1}
-         maximumValue={30}
-         step={1}
-         value={totalRounds}
-         onValueChange={(value) => setTotalRounds(value)}
-         />
-         <Button title="Start Session" onPress={startSession}   />
+          <Text>Select Number of Rounds: {totalRounds}</Text>
+
+          <Slider
+            style={{ width: 200, height: 40 }}
+            minimumValue={1}
+            maximumValue={30}
+            step={1}
+            value={totalRounds}
+            onValueChange={(value) => setTotalRounds(value)}
+          />
+          <Button title="Start Session" onPress={startSession} />
         </View>
-      ):(
+      ) : (
 
         <View style={styles.sessionContainer}>
           <Text style={styles.roundInfo}>
@@ -255,7 +258,7 @@ export default function TrainingPage() {
           <Text style={styles.statText}>Average Score: {stats.averageScore}</Text>
           <Text style={styles.statText}>Highest Score: {stats.highestScore}</Text>
           <Text style={styles.statText}>Lowest Score: {stats.lowestScore}</Text>
-          
+
           {/* Render session control buttons */}
           {session.currentRound < totalRounds ? (
             <Button
@@ -263,13 +266,13 @@ export default function TrainingPage() {
               onPress={nextRound}
               disabled={session.currentRoundScore === 0}
             />
-          ):(
+          ) : (
             session.currentRoundScore > 0 && (
               <Button
                 title="Save Session"
                 onPress={saveSession}
                 disabled={session.currentRoundScore === 0}
-              />  
+              />
             )
           )}
         </View>
@@ -283,7 +286,16 @@ export default function TrainingPage() {
           </Text>
         ))}
       </View>
+
+      <View style={styles.footer}>
+        <View style={styles.buttonRow}>
+        
+          <Button title="RESET" onPress={() => handleTrainingReset(setSession, setSessionStarted, setProcessedDarts, setImage)} />
+        </View>
+      </View>
+
     </ScrollView>
+
   );
 }
 
@@ -345,5 +357,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 5,
   },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
+    padding: 10,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    gap: 12,
+  },
   
+
 });
