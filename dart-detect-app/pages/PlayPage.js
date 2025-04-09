@@ -322,9 +322,9 @@ export default function PlayPage() {
           <Button title="RESET" onPress={() => handleReset(setPlayers, setCurrentPlayerIndex)} />
         </View>
       </View>
-        {/* Webcam Capture Component */}
-        {showWebcam && (
-          <WebCamCapture
+      {/* Webcam Capture Component */}
+      {showWebcam && (
+        <WebCamCapture
           onCapture={async (base64) => {
             const blob = await (await fetch(base64)).blob();
             const filename = `webcam_${Date.now()}.jpg`;
@@ -342,8 +342,8 @@ export default function PlayPage() {
             await processImage(filename);
           }}
           onClose={() => setShowWebcam(false)} // Close webcam when done
-          />
-        )}
+        />
+      )}
 
     </SafeAreaView>
   );
