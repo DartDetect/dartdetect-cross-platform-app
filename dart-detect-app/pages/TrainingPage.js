@@ -78,6 +78,30 @@ export default function TrainingPage() {
     }
   };
 
+  // Function to take a photo
+    const takePhoto = async () => {
+      if (Platform.OS === "web") {
+        setShowWebcam(true); // Show webcam for photo capture
+        return;
+      }
+  
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert("Permission Required", "Camera access is required.");
+        return;
+      }
+  
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        quality: 1,
+      });
+  
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+        await uploadImage(result.assets[0].uri);
+      }
+    };
+
   // Function to upload the image to S3 via the Flask backend
   const uploadImage = async (uri) => {
     try {
