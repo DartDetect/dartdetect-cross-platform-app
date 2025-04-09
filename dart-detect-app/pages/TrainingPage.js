@@ -8,6 +8,8 @@ import { InitialiseSession } from "../services/TrainingSessionMode";
 import { addRoundScore, calculateStats } from "../services/TrainingSessionMode"
 import { getAuth } from "firebase/auth";
 import { saveTrainingSession } from "../services/firestoreDatabase";
+import WebCamCapture from "../services/WebCamCapture";
+import { Platform } from "react-native";
 
 export default function TrainingPage() {
   const [image, setImage] = useState(null); // holds selected image URI
@@ -23,6 +25,8 @@ export default function TrainingPage() {
 
   const stats = calculateStats(session.roundScores);
   const cumulativeScore = Number(stats.totalScore) + session.currentRoundScore;
+
+  const [showWebcam, setShowWebcam] = useState(false); // State to control webcam visibility
 
   const startSession = () => {
     setSessionStarted(true);
