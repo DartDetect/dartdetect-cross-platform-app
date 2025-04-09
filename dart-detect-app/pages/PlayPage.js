@@ -1,10 +1,11 @@
 // pages/PlayPage.js
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Button, Image, Alert, ScrollView, TextInput } from "react-native";
+import { View, Text, StyleSheet, Button, Image, Alert, ScrollView, TextInput, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { getAuth } from "firebase/auth";
 import { savePlaySession } from "../services/firestoreDatabase";
 import { SafeAreaView } from "react-native-safe-area-context";
+import WebCamCapture from "../services/WebCamCapture";
 
 // import button functions from the buttons folder
 import { handleReset } from "../services/Buttons/reset";
@@ -31,6 +32,8 @@ export default function PlayPage() {
 
   const [editingScore, setEditingScore] = useState(null); // New state for inline editing
   const [manualScore, setManualScore] = useState(""); // New state for the input value
+
+  const [showWebcam, setShowWebcam] = useState(false); // State to control webcam visibility
 
   // New helper function for inline editing
   const handleScoreEdit = (playerIndex, scoreIndex, newScore) => {
@@ -81,8 +84,12 @@ export default function PlayPage() {
 
   // Function to take a photo
   const takePhoto = async () => {
-    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (Platform.OS === "web") {
+      setShowWebcam(true); // Show webcam for photo capture
+      return;
+    }
 
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert("Permission Required", "Camera access is required.");
       return;
@@ -315,6 +322,29 @@ export default function PlayPage() {
           <Button title="Reset" onPress={() => handleReset(setPlayers, setCurrentPlayerIndex)} />
         </View>
       </View>
+        {/* Webcam Capture Component */}
+        {showWebcam && (
+          <WebCamCapture
+          onCapture={async (base64) => {
+            const blob = await (await fetch(base64)).blob();
+            const filename = `webcam_${Date.now()}.jpg`;
+
+            const presignedResponse = await fetch(
+              `http://localhost:5001/get_presigned_url?filename=${filename}&content_type=image/jpeg`
+            );
+            const { url } = await presignedResponse.json();
+
+            await fetch(url, {
+              method: "PUT",
+              body: blob,
+              headers: { "Content-Type": "image/jpeg" },
+            });
+            await processImage(filename);
+          }}
+          onClose={() => setShowWebcam(false)} // Close webcam when done
+          />
+        )}
+
     </SafeAreaView>
   );
 }

@@ -39,6 +39,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
     padding: 16,
-    
+    backgroundColor: "#f9f9f9",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    width: "90%",
+    alignSelf: "center",
+  },
+  webcamWrapper: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  webcam: {
+    width: 320,
+    height: 240,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    marginTop: 10,
+    justifyContent: "space-between",
+    width: 240,
   },
 });
