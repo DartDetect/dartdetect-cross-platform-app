@@ -10,8 +10,10 @@ import { getAuth } from "firebase/auth";
 import { saveTrainingSession } from "../services/firestoreDatabase";
 import WebCamCapture from "../services/WebCamCapture";
 import { Platform } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { handleTrainingReset } from "../services/Buttons/TrainingReset";
+
 
 
 export default function TrainingPage() {
@@ -228,6 +230,7 @@ export default function TrainingPage() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Training Section</Text>
 
@@ -279,7 +282,7 @@ export default function TrainingPage() {
       )}
 
       <View style={styles.resultContainer}>
-        <Text style={styles.resultTitle}>Processed Images:</Text>
+        <Text style={styles.resultTitle}>Processed Scores:</Text>
         {processedDarts.map((dart, index) => (
           <Text key={index} style={styles.resultText}>
             🎯 Dart Score: {dart.score} (Image: {dart.filename})
@@ -289,12 +292,13 @@ export default function TrainingPage() {
 
       <View style={styles.footer}>
         <View style={styles.buttonRow}>
-        
+          <Button title="UNDO" onPress={() => {}} />
           <Button title="RESET" onPress={() => handleTrainingReset(setSession, setSessionStarted, setProcessedDarts, setImage)} />
         </View>
       </View>
 
     </ScrollView>
+    </SafeAreaView>
 
   );
 }
@@ -303,12 +307,12 @@ export default function TrainingPage() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    justifyContent: "center",
+    
     alignItems: "center",
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
     marginBottom: 10,
   },

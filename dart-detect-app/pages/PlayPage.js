@@ -319,7 +319,7 @@ export default function PlayPage() {
         <View style={styles.buttonRow}>
           <Button title="UNDO" onPress={() => handleUndo(currentPlayerIndex, setPlayers)} />
           <Button title="📷" onPress={takePhoto} disabled={uploading} />
-          <Button title="Reset" onPress={() => handleReset(setPlayers, setCurrentPlayerIndex)} />
+          <Button title="RESET" onPress={() => handleReset(setPlayers, setCurrentPlayerIndex)} />
         </View>
       </View>
         {/* Webcam Capture Component */}
