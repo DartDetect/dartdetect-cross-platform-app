@@ -1,5 +1,6 @@
-import { doc, setDoc, collection, addDoc } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc, query, where } from "firebase/firestore";
 import { db } from "./firebaseConfig"; // Import Firestore
+import { getAuth } from "firebase/auth"; // Import Firebase Authentication
 
 // Function to create a user profile in Firestore
 export const createUserProfile = async (uid, name, nationality) => {
@@ -55,5 +56,20 @@ export const savePlaySession = async (uid, sessionData) => {
   } catch (error) {
     console.error("Error saving play session:", error);
   }
+};
+
+// Fetch play sessions for current user
+export const fetchPlaySessions = async () => {
+  const auth = getAuth();
+  const uid = auth.currentUser.uid;
+
+  const q = query(collection(db, "playSessions"), where("uid", "==", uid));
+  const snapshot = await getDocs(q);
+
+  // Return sessions with document id
+  return snapshot.docs.map(doc => ({ 
+    id: doc.id, 
+    ...doc.data() 
+  }));
 };
 
