@@ -1,4 +1,4 @@
-import { doc, setDoc, collection, addDoc, query, where } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig"; // Import Firestore
 import { getAuth } from "firebase/auth"; // Import Firebase Authentication
 
@@ -65,6 +65,8 @@ export const fetchPlaySessions = async () => {
 
   const q = query(collection(db, "playSessions"), where("uid", "==", uid));
   const snapshot = await getDocs(q);
+
+  console.log('Play Sessions Snapshot:', snapshot.docs.map(doc => doc.data()));
 
   // Return sessions with document id
   return snapshot.docs.map(doc => ({ 

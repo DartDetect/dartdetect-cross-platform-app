@@ -8,6 +8,9 @@ import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import PlayPage from "./pages/PlayPage";
 import TrainingPage from "./pages/TrainingPage";
+import PlayHistoryPage from "./pages/PlayHistoryPage";
+
+
 
 
 import { onAuthStateChanged } from "firebase/auth";
@@ -24,6 +27,7 @@ function Tabs() {
       <Tab.Screen name="Dashboard" component={Dashboard} />
       <Tab.Screen name="Training" component={TrainingPage} />
       <Tab.Screen name="Play" component={PlayPage} />
+      
     </Tab.Navigator>
   );
 }
@@ -48,7 +52,10 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name="Tabs" component={Tabs} />
+          <><Stack.Screen name="Tabs" component={Tabs} />
+          <Stack.Screen name="PlayHistory" component={PlayHistoryPage} />
+          </>
+
         ): 
         (
           <>

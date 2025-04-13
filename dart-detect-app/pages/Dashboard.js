@@ -7,6 +7,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { doc, getDoc,collection,query,where,getDocs,orderBy, limit } from "firebase/firestore";
 import TrainingChart from "../services/TrainingChart";
 import PlayChart from "../services/PlayChart"; 
+import { useNavigation } from "@react-navigation/native";
+
 
 
 export default function Dashboard() {
@@ -18,6 +20,11 @@ export default function Dashboard() {
 
   const [playStats, setPlayStats] = useState([]); // Store play session stats
   const [playChartData, setPlayChartData] = useState([]);
+
+  const navigation = useNavigation();
+  
+  
+
 
 
   // Function to handle user logout
@@ -213,7 +220,7 @@ export default function Dashboard() {
       )}
        </View>
     </ScrollView>
-
+      <Button title="View Play History" onPress={() => navigation.navigate("PlayHistory")} />
       <Button title="Logout" onPress={handleLogout} />
     </ScrollView>
     </SafeAreaView>
