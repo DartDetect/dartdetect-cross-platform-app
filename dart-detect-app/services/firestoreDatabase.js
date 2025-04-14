@@ -1,4 +1,4 @@
-import { doc, setDoc, collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc, query, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig"; // Import Firestore
 import { getAuth } from "firebase/auth"; // Import Firebase Authentication
 
@@ -66,12 +66,21 @@ export const fetchPlaySessions = async () => {
   const q = query(collection(db, "playSessions"), where("uid", "==", uid));
   const snapshot = await getDocs(q);
 
-  console.log('Play Sessions Snapshot:', snapshot.docs.map(doc => doc.data()));
-
   // Return sessions with document id
   return snapshot.docs.map(doc => ({ 
     id: doc.id, 
     ...doc.data() 
   }));
+};
+
+// Function to delete a play session from Firestore
+export const deletePlaySession = async (sessionId) => {
+  try {
+    await deleteDoc(doc(db, "playSessions", sessionId));  // Delete the session by id
+    console.log("Session deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting session:", error);
+    throw new Error("Failed to delete session.");
+  }
 };
 

@@ -1,8 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, ActivityIndicator, Button, Alert } from "react-native";
-import { fetchPlaySessions } from "../services/firestoreDatabase";
+import { fetchPlaySessions, deletePlaySession } from "../services/firestoreDatabase";
 import { FlatList } from "react-native-gesture-handler";
 import { useEffect } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export default function PlayHistoryPage() {
@@ -28,6 +29,7 @@ useEffect(() => {
 }, []);
 
 const renderItem = ({ item }) => (
+ 
   <View style={styles.sessionItem}>
     <Text style={styles.sessionText}>{item.name}</Text>
     <Text>Total Score: {item.totalScore}</Text>
@@ -37,9 +39,24 @@ const renderItem = ({ item }) => (
     </Text>
     <Button title="Delete" onPress={() => handleDelete(item.id)} />
   </View>
+ 
 );
 
+const handleDelete = async (sessionId) => {
+  try {
+    await deletePlaySession(sessionId);  // Delete the session from Firestore
+    setSessions(sessions.filter((session) => session.id !== sessionId)); 
+    Alert.alert("Success", "Session deleted!");
+  } catch (error) {
+    Alert.alert("Error", "Could not delete session.");
+    console.error(error);
+  }
+};
+
+
+
   return (
+    <SafeAreaView style={{ flex: 1 }}>
     <View style={styles.container}>
       <Text style={styles.title}>Play Mode History</Text>
       {loading ? (
@@ -53,6 +70,7 @@ const renderItem = ({ item }) => (
         keyExtractor={(item) => item.id} />
       )}
     </View>
+    </SafeAreaView>
   );
 }
 
@@ -86,4 +104,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#f9f9f9",
   },
+
+
 });
