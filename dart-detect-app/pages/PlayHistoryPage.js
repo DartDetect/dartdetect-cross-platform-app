@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, ActivityIndicator, Button, Alert } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Button, Alert, TextInput } from "react-native";
 import { fetchPlaySessions, deletePlaySession } from "../services/firestoreDatabase";
 import { FlatList } from "react-native-gesture-handler";
 import { useEffect } from "react";
@@ -9,6 +9,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function PlayHistoryPage() {
 const [sessions, setSessions] = React.useState([]);
 const [loading, setLoading] = React.useState(true);
+const [filteredSessions, setFilteredSessions] = React.useState([]);
+const[filterText, setFilterText] = React.useState("");
 
 useEffect(() => {
   const loadSessions = async () => {
@@ -16,7 +18,8 @@ useEffect(() => {
       const data = await fetchPlaySessions();
       // Sort by newest first
       const sorted = data.sort((a, b) => b.timestamp?.toDate() - a.timestamp?.toDate());
-      setSessions(sorted);
+      setSessions(sorted);  // Set all sessions
+      setFilteredSessions(sorted); // Initialize filtered sessions with all sessions
     } catch (err) {
       Alert.alert("Error", "Could not load play sessions.");
       console.error(err);
@@ -27,6 +30,14 @@ useEffect(() => {
 
   loadSessions();
 }, []);
+
+const handleFilter = (text) => {
+  setFilterText(text);
+  const filtered = sessions.filter((session) => 
+    session.name.toLowerCase().includes(text.toLowerCase()) 
+  );
+  setFilteredSessions(filtered); // Set filtered sessions based on the input
+};
 
 const renderItem = ({ item }) => (
  
@@ -59,13 +70,21 @@ const handleDelete = async (sessionId) => {
     <SafeAreaView style={{ flex: 1 }}>
     <View style={styles.container}>
       <Text style={styles.title}>Play Mode History</Text>
+
+      <TextInput
+      style={styles.filterInput}
+      placeholder="Filter by player name"
+      value={filterText}
+      onChangeText={handleFilter}
+      />
+
       {loading ? (
         <ActivityIndicator size="large"/>
       ) : sessions.length === 0 ? (
         <Text>No Play Sessions found</Text>
       ) : (
         <FlatList
-        data={sessions}
+        data={filteredSessions}
         renderItem={renderItem}
         keyExtractor={(item) => item.id} />
       )}
@@ -103,6 +122,14 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 8,
     backgroundColor: "#f9f9f9",
+  },
+  filterInput: {
+    height: 40,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
   },
 
 
