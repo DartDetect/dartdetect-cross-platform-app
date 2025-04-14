@@ -27,6 +27,7 @@ function Tabs() {
       <Tab.Screen name="Dashboard" component={Dashboard} />
       <Tab.Screen name="Training" component={TrainingPage} />
       <Tab.Screen name="Play" component={PlayPage} />
+      <Tab.Screen name="PlayHistory" component={PlayHistoryPage} />
       
     </Tab.Navigator>
   );
@@ -53,7 +54,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <><Stack.Screen name="Tabs" component={Tabs} />
-          <Stack.Screen name="PlayHistory" component={PlayHistoryPage} />
+          
           </>
 
         ): 

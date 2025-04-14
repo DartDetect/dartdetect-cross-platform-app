@@ -220,7 +220,7 @@ export default function Dashboard() {
       )}
        </View>
     </ScrollView>
-      <Button title="View Play History" onPress={() => navigation.navigate("PlayHistory")} />
+      
       <Button title="Logout" onPress={handleLogout} />
     </ScrollView>
     </SafeAreaView>
