@@ -1,6 +1,6 @@
 // pages/TrainingPage.js
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Button, Alert, Image, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Button, Alert, Image, ScrollView, TextInput } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
 import Slider from "@react-native-community/slider";
@@ -27,11 +27,15 @@ export default function TrainingPage() {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [totalRounds, setTotalRounds] = useState(1);
   const [session, setSession] = useState(InitialiseSession());
+  const [editingScore, setEditingScore] = useState(null); // State to control editing score mode
+  const [manualScore, setManualScore] = useState(""); // State to hold manual score input
 
   const stats = calculateStats(session.roundScores);
   const cumulativeScore = Number(stats.totalScore) + session.currentRoundScore;
 
   const [showWebcam, setShowWebcam] = useState(false); // State to control webcam visibility
+
+
 
   const startSession = () => {
     setSessionStarted(true);
@@ -229,102 +233,143 @@ export default function TrainingPage() {
     }
   };
 
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Training Mode</Text>
+  const handleScoreEdit = (scoreIndex, newScore) => {
+    const updatedDarts = [...processedDarts];
+    updatedDarts[scoreIndex].score = newScore;
+    setProcessedDarts(updatedDarts);
+    setEditingScore(null);
+    setManualScore("");
 
-        {!sessionStarted ? (
-          <View style={styles.sessionSetup}>
-            <Text>Select Number of Rounds: {totalRounds}</Text>
+    const updatedRoundScore = updatedDarts.reduce((sum, dart) => sum + dart.score, 0);
+    setSession((prev) => ({
+      ...prev,
+      currentRoundScore: updatedRoundScore,
+    }));
 
-            <Slider
-              style={{ width: 200, height: 40 }}
-              minimumValue={1}
-              maximumValue={30}
-              step={1}
-              value={totalRounds}
-              onValueChange={(value) => setTotalRounds(value)}
+  };
+
+const handleEditButtonClick = (index) => {
+  setEditingScore(index);
+  setManualScore(processedDarts[index].score.toString());
+};
+
+return (
+  <SafeAreaView style={{ flex: 1 }}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Training Mode</Text>
+
+      {!sessionStarted ? (
+        <View style={styles.sessionSetup}>
+          <Text>Select Number of Rounds: {totalRounds}</Text>
+
+          <Slider
+            style={{ width: 200, height: 40 }}
+            minimumValue={1}
+            maximumValue={30}
+            step={1}
+            value={totalRounds}
+            onValueChange={(value) => setTotalRounds(value)}
+          />
+          <Button title="Start Session" onPress={startSession} />
+        </View>
+      ) : (
+
+        <View style={styles.sessionContainer}>
+          <Text style={styles.roundInfo}>
+            Round {session.currentRound} of {totalRounds}
+          </Text>
+          <Button title="Pick an Image 📂" onPress={pickImage} />
+          {uploading && <Text>Uploading...</Text>}
+          {image && <Image source={{ uri: image }} style={styles.image} />}
+          <Text style={styles.totalScore}>Cumulative Score: {cumulativeScore}</Text>
+          <Text style={styles.statText}>Average Score: {stats.averageScore}</Text>
+          <Text style={styles.statText}>Highest Score: {stats.highestScore}</Text>
+          <Text style={styles.statText}>Lowest Score: {stats.lowestScore}</Text>
+
+          {/* Render session control buttons */}
+          {session.currentRound < totalRounds ? (
+            <Button
+              title="Next Round"
+              onPress={nextRound}
+              disabled={session.currentRoundScore === 0}
             />
-            <Button title="Start Session" onPress={startSession} />
-          </View>
-        ) : (
-
-          <View style={styles.sessionContainer}>
-            <Text style={styles.roundInfo}>
-              Round {session.currentRound} of {totalRounds}
-            </Text>
-            <Button title="Pick an Image 📂" onPress={pickImage} />
-            {uploading && <Text>Uploading...</Text>}
-            {image && <Image source={{ uri: image }} style={styles.image} />}
-            <Text style={styles.totalScore}>Cumulative Score: {cumulativeScore}</Text>
-            <Text style={styles.statText}>Average Score: {stats.averageScore}</Text>
-            <Text style={styles.statText}>Highest Score: {stats.highestScore}</Text>
-            <Text style={styles.statText}>Lowest Score: {stats.lowestScore}</Text>
-
-            {/* Render session control buttons */}
-            {session.currentRound < totalRounds ? (
+          ) : (
+            session.currentRoundScore > 0 && (
               <Button
-                title="Next Round"
-                onPress={nextRound}
+                title="Save Session"
+                onPress={saveSession}
                 disabled={session.currentRoundScore === 0}
               />
-            ) : (
-              session.currentRoundScore > 0 && (
-                <Button
-                  title="Save Session"
-                  onPress={saveSession}
-                  disabled={session.currentRoundScore === 0}
-                />
-              )
-            )}
-          </View>
-        )}
-
-        <View style={styles.resultContainer}>
-          <Text style={styles.resultTitle}>Processed Scores:</Text>
-          {processedDarts.map((dart, index) => (
-            <Text key={index} style={styles.resultText}>
-              🎯 Dart Score: {dart.score} (Image: {dart.filename})
-            </Text>
-          ))}
+            )
+          )}
         </View>
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <View style={styles.buttonRow}>
-          <Button title="UNDO" onPress={() => { }} />
-          <Button title="📷" onPress={takePhoto} disabled={uploading} />
-          <Button title="RESET" onPress={() => handleTrainingReset(setSession, setSessionStarted, setProcessedDarts, setImage)} />
-        </View>
-      </View>
-
-
-      {/* Webcam Capture Component */}
-      {showWebcam && (
-        <WebCamCapture
-          onCapture={async (base64) => {
-            const blob = await (await fetch(base64)).blob();
-            const filename = `webcam_${Date.now()}.jpg`;
-
-            const presignedResponse = await fetch(
-              `http://localhost:5001/get_presigned_url?filename=${filename}&content_type=image/jpeg`
-            );
-            const { url } = await presignedResponse.json();
-
-            await fetch(url, {
-              method: "PUT",
-              body: blob,
-              headers: { "Content-Type": "image/jpeg" },
-            });
-            await processImage(filename);
-          }}
-          onClose={() => setShowWebcam(false)} // Close webcam when done
-        />
       )}
-    </SafeAreaView>
 
-  );
+      <View style={styles.resultContainer}>
+        <Text style={styles.resultTitle}>Processed Scores:</Text>
+        {processedDarts.map((dart, index) => {
+          const isEditing = editingScore === index; // Check if this score is being edited
+          return (
+            <View key={index} style={styles.historyItem}>
+              {isEditing ? (
+                <>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={manualScore !== undefined && manualScore !== null ? manualScore.toString() : ""}
+                    onChangeText={setManualScore}
+                  />
+                  <Button title="Save" onPress={() => handleScoreEdit(index, parseInt(manualScore)) || 0}
+                  />
+                </>
+              ) : (
+                <>
+                  <Text key={index} style={styles.resultText}>
+                    🎯 Dart Score: {dart.score} (Image: {dart.filename})
+                  </Text>
+                  <Button title="Edit" onPress={() => handleEditButtonClick(index)} />
+
+                </>)}
+            </View>
+          );
+        })}
+      </View>
+    </ScrollView>
+
+    <View style={styles.footer}>
+      <View style={styles.buttonRow}>
+        <Button title="UNDO" onPress={() => { }} />
+        <Button title="📷" onPress={takePhoto} disabled={uploading} />
+        <Button title="RESET" onPress={() => handleTrainingReset(setSession, setSessionStarted, setProcessedDarts, setImage)} />
+      </View>
+    </View>
+
+
+    {/* Webcam Capture Component */}
+    {showWebcam && (
+      <WebCamCapture
+        onCapture={async (base64) => {
+          const blob = await (await fetch(base64)).blob();
+          const filename = `webcam_${Date.now()}.jpg`;
+
+          const presignedResponse = await fetch(
+            `http://localhost:5001/get_presigned_url?filename=${filename}&content_type=image/jpeg`
+          );
+          const { url } = await presignedResponse.json();
+
+          await fetch(url, {
+            method: "PUT",
+            body: blob,
+            headers: { "Content-Type": "image/jpeg" },
+          });
+          await processImage(filename);
+        }}
+        onClose={() => setShowWebcam(false)} // Close webcam when done
+      />
+    )}
+  </SafeAreaView>
+
+);
 }
 
 
@@ -399,6 +444,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     gap: 12,
+  },
+  historyItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+    gap: 6,
+  },
+  input: {
+    width: 60,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    padding: 4,
+    textAlign: "center",
   },
 
 
