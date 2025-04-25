@@ -4,6 +4,7 @@ import { fetchPlaySessions, deletePlaySession } from "../services/firestoreDatab
 import { FlatList } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { RefreshControl } from "react-native-gesture-handler";
 
 
 export default function PlayHistoryPage() {
@@ -12,7 +13,9 @@ const [loading, setLoading] = React.useState(true);
 const [filteredSessions, setFilteredSessions] = React.useState([]);
 const[filterText, setFilterText] = React.useState("");
 
-useEffect(() => {
+const[refreshing, setRefreshing] = React.useState(false);
+
+
   const loadSessions = async () => {
     try {
       const data = await fetchPlaySessions();
@@ -28,7 +31,14 @@ useEffect(() => {
     }
   };
 
-  loadSessions();
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadSessions();
+    setRefreshing(false); 
+  };
+
+  useEffect(() => {
+    loadSessions(); // Load sessions 
 }, []);
 
 const handleFilter = (text) => {
@@ -56,7 +66,15 @@ const renderItem = ({ item }) => (
 const handleDelete = async (sessionId) => {
   try {
     await deletePlaySession(sessionId);  // Delete the session from Firestore
-    setSessions(sessions.filter((session) => session.id !== sessionId)); 
+
+    const updatedSessions = sessions.filter((session) => session.id !== sessionId); 
+    setSessions(updatedSessions); 
+
+    const updatedFiltered = updatedSessions.filter((session) =>
+      session.name.toLowerCase().includes(filterText.toLowerCase())
+  );
+    setFilteredSessions(updatedFiltered); // Update filtered sessions after deletion
+
     Alert.alert("Success", "Session deleted!");
   } catch (error) {
     Alert.alert("Error", "Could not delete session.");
@@ -68,7 +86,7 @@ const handleDelete = async (sessionId) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-    <View style={styles.container}>
+    
       <Text style={styles.title}>📜Play Mode History📜</Text>
 
       <TextInput
@@ -81,14 +99,17 @@ const handleDelete = async (sessionId) => {
       {loading ? (
         <ActivityIndicator size="large"/>
       ) : sessions.length === 0 ? (
-        <Text>No Play Sessions found</Text>
+        <Text style ={styles.noSessionsText}>No Play Sessions found</Text>
       ) : (
         <FlatList
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
         data={filteredSessions}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id} />
+        keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        } />
       )}
-    </View>
     </SafeAreaView>
   );
 }
@@ -130,6 +151,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     marginBottom: 16,
+  },
+  noSessionsText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#555",
+    marginTop: 20,
   },
 
 
