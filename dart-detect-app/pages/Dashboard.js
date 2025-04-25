@@ -8,6 +8,7 @@ import { doc, getDoc,collection,query,where,getDocs,orderBy, limit } from "fireb
 import TrainingChart from "../services/TrainingChart";
 import PlayChart from "../services/PlayChart"; 
 import { useNavigation } from "@react-navigation/native";
+import { RefreshControl } from "react-native-gesture-handler";
 
 
 
@@ -22,25 +23,13 @@ export default function Dashboard() {
   const [playChartData, setPlayChartData] = useState([]);
 
   const navigation = useNavigation();
+
+  const [refreshing, setRefreshing] = useState(false); // State for pull to refresh
   
-  
-
-
-
-  // Function to handle user logout
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      Alert.alert("Logged Out", "You have been logged out.");
-      //navigation.navigate("LoginPage"); // Redirect to LoginPage
-    } catch (error) {
-      Alert.alert("Error", error.message);
-    }
-  };
-
+ 
   // useEffect to fetch user data from Firestore
-  useEffect(() => {
-    async function fetchUser() {
+  
+    const fetchUser = async() =>{
       try {
         const userDocRef = doc(db, "users", auth.currentUser.uid); // Get referenceto user document in Firestore
         const userDoc = await getDoc(userDocRef); // Fetch user document
@@ -54,12 +43,10 @@ export default function Dashboard() {
       } finally {
         setLoading(false);
       }
-    }
-    fetchUser();
-  }, []);
+  };
 
-  useEffect(() => {
-    async function fetchTrainingStats() {
+  
+    const fetchTrainingStats = async () => {
       try {
         // Firestore query to get training sessions for the current user
         const q = query(
@@ -104,15 +91,10 @@ export default function Dashboard() {
       } catch (error) {
         console.error("Error fetching training stats:", error);
         Alert.alert("Error", "Failed to load training stats.");
-      }
-    }
-  
-    fetchTrainingStats();
-  }, []);
+      }   
+  };
 
-  
-  useEffect(() => {
-    async function fetchPlayStats() {
+    const fetchPlayStats = async ()  => {
       try {
         const q = query(
           collection(db, "playSessions"),
@@ -161,9 +143,37 @@ export default function Dashboard() {
         console.error("Error fetching play stats:", err);
         Alert.alert("Error", "Failed to load play stats.");
       }
+    };
+
+    // useEffect hooks
+    useEffect(() => {
+      fetchUser();
+    }, []); 
+
+    useEffect(() => {
+      fetchTrainingStats();
+    }, []);
+
+    useEffect(() => {
+      fetchPlayStats(); 
+    }, []);
+    
+    const onRefresh = async () => {
+      setRefreshing(true); // Set refreshing to true
+      await Promise.all([fetchUser(), fetchTrainingStats(), fetchPlayStats()]); // Fetch user stats
+      setRefreshing(false); 
+    };
+
+    // Function to handle user logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      Alert.alert("Logged Out", "You have been logged out.");
+      //navigation.navigate("LoginPage"); // Redirect to LoginPage
+    } catch (error) {
+      Alert.alert("Error", error.message);
     }
-    fetchPlayStats();
-  }, []);
+  };
   
 
   // If data is loading show loadinf screen
@@ -177,7 +187,7 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
     
       <Text style={styles.welcome}>📊Welcome, {userData.name}!📊</Text>
       <Text style={styles.userInfo}>Nationality: {userData.nationality}</Text> 
