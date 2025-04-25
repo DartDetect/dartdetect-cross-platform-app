@@ -69,7 +69,7 @@ const handleDelete = async (sessionId) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
     <View style={styles.container}>
-      <Text style={styles.title}>Play Mode History</Text>
+      <Text style={styles.title}>📜Play Mode History📜</Text>
 
       <TextInput
       style={styles.filterInput}

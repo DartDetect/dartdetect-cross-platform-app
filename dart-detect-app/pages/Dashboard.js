@@ -179,7 +179,7 @@ export default function Dashboard() {
     <SafeAreaView style={styles.safeArea}>
     <ScrollView contentContainerStyle={styles.container}>
     
-      <Text style={styles.welcome}>Welcome, {userData.name}!</Text>
+      <Text style={styles.welcome}>📊Welcome, {userData.name}!📊</Text>
       <Text style={styles.userInfo}>Nationality: {userData.nationality}</Text> 
       
       <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollWrapper}>

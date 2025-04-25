@@ -256,7 +256,7 @@ const handleEditButtonClick = (index) => {
 return (
   <SafeAreaView style={styles.safeArea}>
     <ScrollView contentContainerStyle={styles.container} style={{backgroundColor: "#f9f9f9"}}>
-      <Text style={styles.title}>Training Mode</Text>
+      <Text style={styles.title}>🏹Training Mode🏹</Text>
 
       {!sessionStarted ? (
         <View style={styles.sessionSetup}>
