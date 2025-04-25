@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#f9f9f9",
   },
   title: {
     fontSize: 24,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 8,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#f1f1f1",
   },
   filterInput: {
     height: 40,

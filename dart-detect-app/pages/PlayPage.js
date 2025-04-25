@@ -214,9 +214,9 @@ export default function PlayPage() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Play Mode - 501</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container} style={{ backgroundColor: "#f9f9f9" }}>
+        <Text style={styles.title}>⚔️Play Mode - 501⚔️</Text>
 
         {!playerNamesSet ? (
           <View style={styles.nameInputContainer}>
@@ -463,6 +463,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     width: "centre",
     marginTop: 10,
-  }
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f9f9f9",
+  },
 
 });

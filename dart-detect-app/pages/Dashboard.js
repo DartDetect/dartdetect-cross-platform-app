@@ -244,6 +244,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    
   },
   welcome: {
     fontSize: 24,
@@ -310,6 +311,11 @@ const styles = StyleSheet.create({
     elevation: 3,
     alignItems: "center",
     minHeight: 400,
+  },
+  ScrollView: {
+    
+    
+    backgroundColor: "#f9f9f9",
   },
   
 });

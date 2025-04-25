@@ -254,8 +254,8 @@ const handleEditButtonClick = (index) => {
 };
 
 return (
-  <SafeAreaView style={{ flex: 1 }}>
-    <ScrollView contentContainerStyle={styles.container}>
+  <SafeAreaView style={styles.safeArea}>
+    <ScrollView contentContainerStyle={styles.container} style={{backgroundColor: "#f9f9f9"}}>
       <Text style={styles.title}>Training Mode</Text>
 
       {!sessionStarted ? (
@@ -458,6 +458,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 4,
     textAlign: "center",
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f9f9f9",
   },
 
 
