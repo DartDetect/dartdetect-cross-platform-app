@@ -5,15 +5,16 @@ import { FlatList } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RefreshControl } from "react-native-gesture-handler";
+import ExportToCSV from "../services/ExportToCVS";
 
 
 export default function PlayHistoryPage() {
-const [sessions, setSessions] = React.useState([]);
-const [loading, setLoading] = React.useState(true);
-const [filteredSessions, setFilteredSessions] = React.useState([]);
-const[filterText, setFilterText] = React.useState("");
+  const [sessions, setSessions] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [filteredSessions, setFilteredSessions] = React.useState([]);
+  const [filterText, setFilterText] = React.useState("");
 
-const[refreshing, setRefreshing] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
 
 
   const loadSessions = async () => {
@@ -34,81 +35,85 @@ const[refreshing, setRefreshing] = React.useState(false);
   const onRefresh = async () => {
     setRefreshing(true);
     await loadSessions();
-    setRefreshing(false); 
+    setRefreshing(false);
   };
 
   useEffect(() => {
     loadSessions(); // Load sessions 
-}, []);
+  }, []);
 
-const handleFilter = (text) => {
-  setFilterText(text);
-  const filtered = sessions.filter((session) => 
-    session.name.toLowerCase().includes(text.toLowerCase()) 
+  const handleFilter = (text) => {
+    setFilterText(text);
+    const filtered = sessions.filter((session) =>
+      session.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredSessions(filtered); // Set filtered sessions based on the input
+  };
+
+  const renderItem = ({ item }) => (
+
+    <View style={styles.sessionItem}>
+      <Text style={styles.sessionText}>{item.name}</Text>
+      <Text>Total Score: {item.totalScore}</Text>
+      <Text>Avg: {item.averageScore} | Rounds: {item.rounds}</Text>
+      <Text style={styles.timestamp}>
+        {item.timestamp?.toDate().toLocaleString()}
+      </Text>
+      <View style={styles.buttonWrapper}>
+        <Button title="Delete" onPress={() => handleDelete(item.id)} />
+      </View>
+    </View>
+
   );
-  setFilteredSessions(filtered); // Set filtered sessions based on the input
-};
 
-const renderItem = ({ item }) => (
- 
-  <View style={styles.sessionItem}>
-    <Text style={styles.sessionText}>{item.name}</Text>
-    <Text>Total Score: {item.totalScore}</Text>
-    <Text>Avg: {item.averageScore} | Rounds: {item.rounds}</Text>
-    <Text style={styles.timestamp}>
-      {item.timestamp?.toDate().toLocaleString()}
-    </Text>
-    <Button title="Delete" onPress={() => handleDelete(item.id)} />
-  </View>
- 
-);
+  const handleDelete = async (sessionId) => {
+    try {
+      await deletePlaySession(sessionId);  // Delete the session from Firestore
 
-const handleDelete = async (sessionId) => {
-  try {
-    await deletePlaySession(sessionId);  // Delete the session from Firestore
+      const updatedSessions = sessions.filter((session) => session.id !== sessionId);
+      setSessions(updatedSessions);
 
-    const updatedSessions = sessions.filter((session) => session.id !== sessionId); 
-    setSessions(updatedSessions); 
+      const updatedFiltered = updatedSessions.filter((session) =>
+        session.name.toLowerCase().includes(filterText.toLowerCase())
+      );
+      setFilteredSessions(updatedFiltered); // Update filtered sessions after deletion
 
-    const updatedFiltered = updatedSessions.filter((session) =>
-      session.name.toLowerCase().includes(filterText.toLowerCase())
-  );
-    setFilteredSessions(updatedFiltered); // Update filtered sessions after deletion
-
-    Alert.alert("Success", "Session deleted!");
-  } catch (error) {
-    Alert.alert("Error", "Could not delete session.");
-    console.error(error);
-  }
-};
+      Alert.alert("Success", "Session deleted!");
+    } catch (error) {
+      Alert.alert("Error", "Could not delete session.");
+      console.error(error);
+    }
+  };
 
 
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-    
+
       <Text style={styles.title}>📜Play Mode History📜</Text>
 
       <TextInput
-      style={styles.filterInput}
-      placeholder="Filter by player name"
-      value={filterText}
-      onChangeText={handleFilter}
+        style={styles.filterInput}
+        placeholder="Filter by player name"
+        value={filterText}
+        onChangeText={handleFilter}
       />
 
+      <ExportToCSV sessions={filteredSessions} buttonStyle={styles.exportButton} buttonTextStyle={styles.exportButtonText} />
+
       {loading ? (
-        <ActivityIndicator size="large"/>
+        <ActivityIndicator size="large" />
       ) : sessions.length === 0 ? (
-        <Text style ={styles.noSessionsText}>No Play Sessions found</Text>
+        <Text style={styles.noSessionsText}>No Play Sessions found</Text>
       ) : (
         <FlatList
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-        data={filteredSessions}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        } />
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+          data={filteredSessions}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          } />
       )}
     </SafeAreaView>
   );
@@ -158,6 +163,10 @@ const styles = StyleSheet.create({
     color: "#555",
     marginTop: 20,
   },
-
+  buttonWrapper: {
+    width: 'auto',
+    alignItems: 'center',
+    marginTop: 10,
+  },
 
 });
