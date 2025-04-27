@@ -363,7 +363,7 @@ export default function TrainingPage() {
               body: blob,
               headers: { "Content-Type": "image/jpeg" },
             });
-            await processImage(filename);
+            await processImageOnBackend(filename);
           }}
           onClose={() => setShowWebcam(false)} // Close webcam when done
         />
