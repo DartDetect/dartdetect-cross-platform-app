@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Button, Alert, ScrollView, SafeAreaView } from "react-native";
 import { signOut } from "firebase/auth";
-import {db, auth } from "../services/firebaseConfig";
+import { db, auth } from "../services/firebaseConfig";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import { doc, getDoc,collection,query,where,getDocs,orderBy, limit } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 import TrainingChart from "../services/TrainingChart";
-import PlayChart from "../services/PlayChart"; 
+import PlayChart from "../services/PlayChart";
 import { useNavigation } from "@react-navigation/native";
 import { RefreshControl } from "react-native-gesture-handler";
 
 
 
 export default function Dashboard() {
-  const[userData, setUserData] = useState({name: "", nationality: ""}); // Store user's name and nationality
+  const [userData, setUserData] = useState({ name: "", nationality: "" }); // Store user's name and nationality
   const [loading, setLoading] = useState(true); //Loading state
 
-  const [trainingStats, setTrainingStats] = useState({ totalRounds: 0, averageOfAverages: "N/A",}); 
+  const [trainingStats, setTrainingStats] = useState({ totalRounds: 0, averageOfAverages: "N/A", });
   const [chartData, setChartData] = useState([]);
 
   const [playStats, setPlayStats] = useState([]); // Store play session stats
@@ -25,146 +25,147 @@ export default function Dashboard() {
   const navigation = useNavigation();
 
   const [refreshing, setRefreshing] = useState(false); // State for pull to refresh
-  
- 
+
+
   // useEffect to fetch user data from Firestore
-  
-    const fetchUser = async() =>{
-      try {
-        const userDocRef = doc(db, "users", auth.currentUser.uid); // Get referenceto user document in Firestore
-        const userDoc = await getDoc(userDocRef); // Fetch user document
-        // Check if doducment exists and set user data
-        if (userDoc.exists()) {
-          setUserData(userDoc.data());
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        Alert.alert("Error", "Failed to load user data.");
-      } finally {
-        setLoading(false);
+
+  const fetchUser = async () => {
+    try {
+      const userDocRef = doc(db, "users", auth.currentUser.uid); // Get referenceto user document in Firestore
+      const userDoc = await getDoc(userDocRef); // Fetch user document
+      // Check if doducment exists and set user data
+      if (userDoc.exists()) {
+        setUserData(userDoc.data());
       }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      Alert.alert("Error", "Failed to load user data.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  
-    const fetchTrainingStats = async () => {
-      try {
-        // Firestore query to get training sessions for the current user
-        const q = query(
-          collection(db, "trainingSessions"),
-          where("uid", "==", auth.currentUser.uid)
-        );
 
-        // Execute the query
-        const snapshot = await getDocs(q);
-  
-        if (snapshot.empty) {
-          setTrainingStats({
-            totalRounds: 0,
-            averageOfAverages: "N/A",
-          });
-          return;
-        }
-  
-        // Calculate total rounds and average of averages
-        let totalRounds = 0;
-        let totalAverageSum = 0;
-        let sessionCount = 0;
-        let sessionAverages = [];
-  
-        // Iterate through each document in the snapshot
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          totalRounds += Number(data.rounds || 0); // Add rounds to total
-          totalAverageSum += Number(data.averageScore || 0); // Add average score to total
-          sessionAverages.push(Number(data.averageScore || 0)); // Store average score for chart data
-          sessionCount++; // Count the number of sessions
-        });
-  
-        // Update the training stats state
+  const fetchTrainingStats = async () => {
+    try {
+      // Firestore query to get training sessions for the current user
+      const q = query(
+        collection(db, "trainingSessions"),
+        where("uid", "==", auth.currentUser.uid)
+      );
+
+      // Execute the query
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
         setTrainingStats({
-          totalRounds,
-          averageOfAverages: (totalAverageSum / sessionCount).toFixed(2),
+          totalRounds: 0,
+          averageOfAverages: "N/A",
         });
+        return;
+      }
 
-        setChartData(sessionAverages); // Set chart data for the training chart
+      // Calculate total rounds and average of averages
+      let totalRounds = 0;
+      let totalAverageSum = 0;
+      let sessionCount = 0;
+      let sessionAverages = [];
 
-      } catch (error) {
-        console.error("Error fetching training stats:", error);
-        Alert.alert("Error", "Failed to load training stats.");
-      }   
+      // Iterate through each document in the snapshot
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        totalRounds += Number(data.rounds || 0); // Add rounds to total
+        totalAverageSum += Number(data.averageScore || 0); // Add average score to total
+        sessionAverages.push(Number(data.averageScore || 0)); // Store average score for chart data
+        sessionCount++; // Count the number of sessions
+      });
+
+      // Update the training stats state
+      setTrainingStats({
+        totalRounds,
+        averageOfAverages: (totalAverageSum / sessionCount).toFixed(2),
+      });
+
+      setChartData(sessionAverages); // Set chart data for the training chart
+
+    } catch (error) {
+      console.error("Error fetching training stats:", error);
+      Alert.alert("Error", "Failed to load training stats.");
+    }
   };
 
-    const fetchPlayStats = async ()  => {
-      try {
-        const q = query(
-          collection(db, "playSessions"),
-          where("uid", "==", auth.currentUser.uid),
-          orderBy("timestamp", "desc")
-        );
-        
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          console.log("No play session found.");
-          return;
-        }
-        
-        const playerStats = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          const existingPlayer = playerStats.find(player => player.name === data.name);
-          
-          if (existingPlayer) {
-            existingPlayer.totalGames += 1;
-            existingPlayer.rounds += data.rounds;
-            existingPlayer.totalScore += data.totalScore;
-            existingPlayer.scores.push(data.averageScore);
-          } else {
-            playerStats.push({
-              name: data.name,
-              totalGames: 1,
-              rounds: data.rounds,
-              totalScore: data.totalScore,
-              averageScore: data.averageScore,
-              scores: [data.averageScore], // Store all scores per round
-            });
-          }
-        });
-  
-        // Calculate the correct average of averages
-        playerStats.forEach(player => {
-          // Calculate average of all scores for the player
-          const totalScore = player.scores.reduce((sum, score) => sum + score, 0);
-          player.averageOfAverages = (totalScore / player.scores.length).toFixed(2); // Update average calculation
-        });
-  
-        setPlayStats(playerStats); // Set latest play session data
-      } catch (err) {
-        console.error("Error fetching play stats:", err);
-        Alert.alert("Error", "Failed to load play stats.");
+  const fetchPlayStats = async () => {
+    try {
+      const q = query(
+        collection(db, "playSessions"),
+        where("uid", "==", auth.currentUser.uid),
+        orderBy("timestamp", "desc"),
+        limit(3)
+      );
+
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        console.log("No play session found.");
+        return;
       }
-    };
 
-    // useEffect hooks
-    useEffect(() => {
-      fetchUser();
-    }, []); 
+      const playerStats = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const existingPlayer = playerStats.find(player => player.name === data.name);
 
-    useEffect(() => {
-      fetchTrainingStats();
-    }, []);
+        if (existingPlayer) {
+          existingPlayer.totalGames += 1;
+          existingPlayer.rounds += data.rounds;
+          existingPlayer.totalScore += data.totalScore;
+          existingPlayer.scores.push(data.averageScore);
+        } else {
+          playerStats.push({
+            name: data.name,
+            totalGames: 1,
+            rounds: data.rounds,
+            totalScore: data.totalScore,
+            averageScore: data.averageScore,
+            scores: [data.averageScore], // Store all scores per round
+          });
+        }
+      });
 
-    useEffect(() => {
-      fetchPlayStats(); 
-    }, []);
-    
-    const onRefresh = async () => {
-      setRefreshing(true); // Set refreshing to true
-      await Promise.all([fetchUser(), fetchTrainingStats(), fetchPlayStats()]); // Fetch user stats
-      setRefreshing(false); 
-    };
+      // Calculate the correct average of averages
+      playerStats.forEach(player => {
+        // Calculate average of all scores for the player
+        const totalScore = player.scores.reduce((sum, score) => sum + score, 0);
+        player.averageOfAverages = (totalScore / player.scores.length).toFixed(2); // Update average calculation
+      });
 
-    // Function to handle user logout
+      setPlayStats(playerStats); // Set latest play session data
+    } catch (err) {
+      console.error("Error fetching play stats:", err);
+      Alert.alert("Error", "Failed to load play stats.");
+    }
+  };
+
+  // useEffect hooks
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    fetchTrainingStats();
+  }, []);
+
+  useEffect(() => {
+    fetchPlayStats();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true); // Set refreshing to true
+    await Promise.all([fetchUser(), fetchTrainingStats(), fetchPlayStats()]); // Fetch user stats
+    setRefreshing(false);
+  };
+
+  // Function to handle user logout
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -174,7 +175,7 @@ export default function Dashboard() {
       Alert.alert("Error", error.message);
     }
   };
-  
+
 
   // If data is loading show loadinf screen
   if (loading) {
@@ -187,52 +188,52 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-    <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-    
-      <Text style={styles.welcome}>📊Welcome, {userData.name}!📊</Text>
-      <Text style={styles.userInfo}>Nationality: {userData.nationality}</Text> 
-      
-      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollWrapper}>
+      <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 
-      <View style={styles.card}>
-       <Text style={styles.statsTitle}>Training Stats</Text>
-        <Text style={styles.statsText}>
-          Total Rounds Played: {trainingStats.totalRounds}
-        </Text>
-        <Text style={styles.statsText}>
-          Average Score Across Sessions: {trainingStats.averageOfAverages}
-        </Text>
-        <View style={styles.chartContainer}>
-        <TrainingChart chartData={chartData} />
-        </View>
-      </View>
+        <Text style={styles.welcome}>📊Welcome, {userData.name}!📊</Text>
+        <Text style={styles.userInfo}>Nationality: {userData.nationality}</Text>
 
-      {/* Play Mode Stats Card */}
-      <View style={styles.card}>
-        <Text style={styles.statsTitle}>Latest Game Stats</Text>
-        {playStats.length > 0 ? (
-          playStats.map((player, index) => (
-            <View key={index}>
-            <Text style={styles.statsTitle}>{player.name}'s Stats</Text>
+        <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollWrapper}>
+
+          <View style={styles.card}>
+            <Text style={styles.statsTitle}>Training Stats</Text>
             <Text style={styles.statsText}>
-              Total Games Played: {player.totalGames}
+              Total Rounds Played: {trainingStats.totalRounds}
             </Text>
             <Text style={styles.statsText}>
-              Rounds Played: {player.rounds}
+              Average Score Across Sessions: {trainingStats.averageOfAverages}
             </Text>
-            <Text style={styles.statsText}>
-              Average Score: {player.averageOfAverages}
-            </Text>
-      </View>
-       ))
-      ) : (
-        <Text>No Play Stats Available</Text>
-      )}
-       </View>
-    </ScrollView>
-      
-      <Button title="Logout" onPress={handleLogout} />
-    </ScrollView>
+            <View style={styles.chartContainer}>
+              <TrainingChart chartData={chartData} />
+            </View>
+          </View>
+
+          {/* Play Mode Stats Card */}
+          <View style={styles.card}>
+            <Text style={styles.statsTitle}>Latest Game Stats</Text>
+            {playStats.length > 0 ? (
+              playStats.map((player, index) => (
+                <View key={index}>
+                  <Text style={styles.statsTitle}>{player.name}'s Stats</Text>
+                  <Text style={styles.statsText}>
+                    Total Games Played: {player.totalGames}
+                  </Text>
+                  <Text style={styles.statsText}>
+                    Rounds Played: {player.rounds}
+                  </Text>
+                  <Text style={styles.statsText}>
+                    Average Score: {player.averageOfAverages}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text>No Play Stats Available</Text>
+            )}
+          </View>
+        </ScrollView>
+
+        <Button title="Logout" onPress={handleLogout} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -241,9 +242,9 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f9f9f9", 
+    backgroundColor: "#f9f9f9",
   },
-  
+
   loadingContainer: {
     flex: 1,
     alignItems: "center",
@@ -254,7 +255,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    
+
   },
   welcome: {
     fontSize: 24,
@@ -303,11 +304,11 @@ const styles = StyleSheet.create({
     width: "100%",
     overflow: "hidden",
   },
-  
+
   scrollWrapper: {
     paddingVertical: 10,
   },
-  
+
   card: {
     width: 320,
     marginHorizontal: 10,
@@ -323,9 +324,9 @@ const styles = StyleSheet.create({
     minHeight: 400,
   },
   ScrollView: {
-    
-    
+
+
     backgroundColor: "#f9f9f9",
   },
-  
+
 });

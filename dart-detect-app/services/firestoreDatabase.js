@@ -5,7 +5,7 @@ import { getAuth } from "firebase/auth"; // Import Firebase Authentication
 // Function to create a user profile in Firestore
 export const createUserProfile = async (uid, name, nationality) => {
   try {
-    
+
     await setDoc(doc(db, "users", uid), {
       name: name,
       nationality: nationality,
@@ -32,7 +32,7 @@ export const saveTrainingSession = async (uid, sessionData) => {
       averageScore: sessionData.averageScore,  // Average score per round
       highestScore: sessionData.highestScore,  // Highest score achieved in a round
       lowestScore: sessionData.lowestScore,    // Lowest score achieved in a round
-      timestamp: new Date(),               
+      timestamp: new Date(),
     });
     console.log("Training session saved successfully!");
   } catch (error) {
@@ -67,9 +67,9 @@ export const fetchPlaySessions = async () => {
   const snapshot = await getDocs(q);
 
   // Return sessions with document id
-  return snapshot.docs.map(doc => ({ 
-    id: doc.id, 
-    ...doc.data() 
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
   }));
 };
 

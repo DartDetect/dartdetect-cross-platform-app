@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -28,7 +28,7 @@ function Tabs() {
       <Tab.Screen name="Training" component={TrainingPage} />
       <Tab.Screen name="Play" component={PlayPage} />
       <Tab.Screen name="PlayHistory" component={PlayHistoryPage} />
-      
+
     </Tab.Navigator>
   );
 }
@@ -46,7 +46,7 @@ export default function App() {
     });
     return unsubscribe;
   }, []);
-  
+
   if (loading) return null;
 
   return (
@@ -54,16 +54,16 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <><Stack.Screen name="Tabs" component={Tabs} />
-          
+
           </>
 
-        ): 
-        (
-          <>
-          <Stack.Screen name = "LoginPage" component={LoginPage}/>
-          <Stack.Screen name="SignupPage" component={SignupPage}/>
-          </>  
-        )}  
+        ) :
+          (
+            <>
+              <Stack.Screen name="LoginPage" component={LoginPage} />
+              <Stack.Screen name="SignupPage" component={SignupPage} />
+            </>
+          )}
       </Stack.Navigator>
     </NavigationContainer>
   );

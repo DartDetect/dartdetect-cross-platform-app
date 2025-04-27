@@ -195,6 +195,7 @@ export default function PlayPage() {
     }
   };
 
+  // Save game results to Firestore
   const saveGameResult = async (finalPlayers) => {
     try {
       const auth = getAuth();
@@ -218,6 +219,7 @@ export default function PlayPage() {
       <ScrollView contentContainerStyle={styles.container} style={{ backgroundColor: "#f9f9f9" }}>
         <Text style={styles.title}>⚔️Play Mode - 501⚔️</Text>
 
+        {/* Player Name Entry Section */}
         {!playerNamesSet ? (
           <View style={styles.nameInputContainer}>
             <Text style={styles.nameInputTitle}>Enter Player Names</Text>
@@ -292,7 +294,7 @@ export default function PlayPage() {
                         ) : (
                           <>
                             <Text style={styles.scoreHistoryText}>
-                              🎯 {player.name} - Score: {round.score} (Image: {round.image})
+                              🎯 {player.name} - Score: {round.score}
                             </Text>
                             <Button
                               title="Edit"

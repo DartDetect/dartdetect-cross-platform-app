@@ -1,17 +1,17 @@
 
 import React, { useState } from "react";
-import { View, Text, StyleSheet,Image, TextInput, Alert, Button} from "react-native";
+import { View, Text, StyleSheet, Image, TextInput, Alert, Button } from "react-native";
 import { auth } from "../services/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 
-export default function LoginPage({navigation}) {
+export default function LoginPage({ navigation }) {
 
   const [email, setEmail] = useState(""); // State for email input
   const [password, setPassword] = useState(""); // State for password input
-  
-   // Function to handle user login
-   const handleLogin = async () => {
+
+  // Function to handle user login
+  const handleLogin = async () => {
     try {
       // Attempt Firebase login
       await signInWithEmailAndPassword(auth, email, password);
@@ -24,7 +24,7 @@ export default function LoginPage({navigation}) {
 
   return (
     <View style={styles.container}>
-        <Image source={require("../assets/logo1.png")} style={styles.logo}/>
+      <Image source={require("../assets/logo1.png")} style={styles.logo} />
       <Text style={styles.title}>DartDetect</Text>
       <Text style={styles.title}>Login Here!</Text>
 
@@ -45,7 +45,7 @@ export default function LoginPage({navigation}) {
         onChangeText={setPassword}
         secureTextEntry
       />
-        <Button title="Log In" onPress={handleLogin} />
+      <Button title="Log In" onPress={handleLogin} />
 
       <Text style={styles.link} onPress={() => navigation.navigate("SignupPage")}>
         Don't have an account? Sign up here.
@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   logo: {
-    width: 100, // Adjust width as needed
-    height: 100, // Adjust height as needed
+    width: 100,
+    height: 100,
     marginBottom: 20,
   },
 

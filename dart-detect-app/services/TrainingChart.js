@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet,ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 
@@ -7,19 +7,19 @@ import { Dimensions } from "react-native";
 
 export default function TrainingChart({ chartData }) {
   const { width } = Dimensions.get("window");
-    // Show fallback if no data
-    if (!chartData || chartData.length === 0) {
-      return (
-        <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>No training session data yet.</Text>
-        </View>
-      );
-    }
-  
+  // Show fallback if no data
+  if (!chartData || chartData.length === 0) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.chartTitle}>Average Score per Session</Text>
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+      <View style={styles.noDataContainer}>
+        <Text style={styles.noDataText}>No training session data yet.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.chartTitle}>Average Score per Session</Text>
+      <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
         <LineChart
           data={{
             labels: chartData.map((_, index) => `#${index + 1}`),
@@ -56,33 +56,33 @@ export default function TrainingChart({ chartData }) {
             width: 371,
           }}
         />
-        </ScrollView>
-      </View>
-    );
-  }
-  
-  
-  const styles = StyleSheet.create({
-    container: {
-      
-      alignItems: "center",
-      width: "100%",
-      justifyContent: "center",
-      marginBottom: 20,
-    },
-    chartTitle: {
-      fontSize: 18,
-      fontWeight: "bold",
-      marginBottom: 10,
-      textAlign: "center",
-    },
-    noDataContainer: {
-      padding: 20,
-      alignItems: "center",
-    },
-    noDataText: {
-      fontSize: 16,
-      fontStyle: "italic",
-      color: "#777",
-    },
-  });
+      </ScrollView>
+    </View>
+  );
+}
+
+
+const styles = StyleSheet.create({
+  container: {
+
+    alignItems: "center",
+    width: "100%",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  noDataContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  noDataText: {
+    fontSize: 16,
+    fontStyle: "italic",
+    color: "#777",
+  },
+});

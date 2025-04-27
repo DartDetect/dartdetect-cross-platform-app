@@ -1,15 +1,17 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-export default function PlayChart({ chartData }) {
-    if (!chartData || chartData.length === 0) {
-        return (
-          <View style={styles.noDataContainer}>
-            <Text style={styles.noDataText}>No play session data yet.</Text>
-          </View>
-        );
-      }
-      
+
+// Function to display the play session chart
+export default function PlayChart({ chartData }) { //
+  if (!chartData || chartData.length === 0) {
+    return (
+      <View style={styles.noDataContainer}>
+        <Text style={styles.noDataText}>No play session data yet.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.chartTitle}>Play Session Chart</Text>
